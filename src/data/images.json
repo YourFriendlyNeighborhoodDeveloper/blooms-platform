@@ -1,0 +1,674 @@
+{
+  "bouquet-lush": {
+    "key": "bouquet-lush",
+    "alt": "Lush hand-tied bouquet of roses, ranunculus and greenery",
+    "width": 2200,
+    "height": 2200,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRnoAAABXRUJQVlA4IG4AAAAwBACdASoUABQAPuFgq02opaQiMAwBEBwJYwC7ABbZ9bc6h3hO5aOcPFAA/sHhqL5MKf6XrC1ryvhIvpRk9oiH37kyEvHvjfjExW3pdkzes9+rX36aZnua++mO6snaSHbhRSSpeeavTY0ZktxAAA==",
+    "color": "rgb(8 24 40)",
+    "source": "https://images.unsplash.com/photo-1487530811176-3780de880c2d"
+  },
+  "bouquet-blush": {
+    "key": "bouquet-blush",
+    "alt": "Blush garden roses and soft greenery wrapped in kraft paper",
+    "width": 2200,
+    "height": 3300,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRnoAAABXRUJQVlA4IG4AAABQBQCdASoUAB4APtlcpU2oJaOiN/qoAQAbCUAToAQN+ckAQPLZwrdotiK9nr4XIsGtxcAA/tWOr0CkaMiZFpFqNTevO16QwcUmzuE5dZWvQPX2B4uguqcgbFdRXznzQTDNt/+CibisF/hcRXkAAA==",
+    "color": "rgb(232 232 232)",
+    "source": "https://images.unsplash.com/photo-1563241527-3004b7be0ffd"
+  },
+  "bouquet-white": {
+    "key": "bouquet-white",
+    "alt": "Hand holding a bouquet of white roses wrapped in kraft paper",
+    "width": 2200,
+    "height": 2933,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRogAAABXRUJQVlA4IHwAAABwBQCdASoUABsAPu1mpk4ppaMiMBgMATAdiWUAtOgQ7T+eIrJZnECnfRKvJ90F+6utqqyAAP7Oof10lzLy/ptsurHUwSnxxsWDtXS6qJGG/ErEqGSifUVaYyVEJEIKJp8ydsq46rTRuQukcHjAviIgFlMBRao5hWa95EAA",
+    "color": "rgb(8 24 24)",
+    "source": "https://images.unsplash.com/photo-1523694576729-dc99e9c0f9b4"
+  },
+  "tulips-vase": {
+    "key": "tulips-vase",
+    "alt": "Pink tulips in a clear glass vase",
+    "width": 2200,
+    "height": 3300,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRmoAAABXRUJQVlA4IF4AAAAQBQCdASoUAB4APu1oqk+ppiOiKA1RMB2JQBmDiLwBZ0QpCh2gGhlAj8KjTyj/IHgAAP70zwLs9pdTlv7zZljsYoCncd0dHOO9VNnV/fKx5HDfsKWmJce0wKuQAAAA",
+    "color": "rgb(232 232 232)",
+    "source": "https://images.unsplash.com/photo-1561181286-d3fee7d55364"
+  },
+  "arrangement-jar": {
+    "key": "arrangement-jar",
+    "alt": "Orange roses, snapdragons and tulips arranged in a glass jar",
+    "width": 2200,
+    "height": 3300,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRm4AAABXRUJQVlA4IGIAAADwBACdASoUAB4APu1eq1AppKOisBgIATAdiUAYz4aN9J82r2BGnizxxHAH5S7J1AAA/vHTrNxLbKM+t8Sv3JDZcZvfbSqWW1LML5yLz9uwvXcfWpB6KphLBcm30QHz/r8AAA==",
+    "color": "rgb(216 216 232)",
+    "source": "https://images.unsplash.com/photo-1533616688419-b7a585564566"
+  },
+  "dahlias-peach": {
+    "key": "dahlias-peach",
+    "alt": "Close-up of soft peach dahlias",
+    "width": 2200,
+    "height": 3320,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRpwAAABXRUJQVlA4IJAAAABQBQCdASoUAB4APu1ip02ppaOiMAgBMB2JagCdMoMtQDNR/mQds9umFwkHJ4QCZ5Q7mgAA/ZvkO3sixD7UqnXucJL8b52BIorqrZ+Cr6+WnpdShihWSzp/o774K5TNzT0nR9U7GyW3J0IisQiRS9OBiKYLFC4XYb9BzWo/3jImCB5B8WWkgqqJZnMxa8BAAAA=",
+    "color": "rgb(216 216 200)",
+    "source": "https://images.unsplash.com/photo-1546842931-886c185b4c8c"
+  },
+  "dahlia-dark": {
+    "key": "dahlia-dark",
+    "alt": "Lavender-tipped dahlia against a dark background",
+    "width": 2200,
+    "height": 2200,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRn4AAABXRUJQVlA4IHIAAADQBACdASoUABQAPulcp02pJSOiN/VYASAdCUAW9wHpYgVVimoxaO8qQb9iJkCDAAD+8tvN68DXG9qQ5ASwbjELZ41KpDQHeU6Bb8qS9RvEqCMS86EUa7mcKyGWLg5oe7sP3P85V1PnyYNApWOd396ZcAA=",
+    "color": "rgb(8 8 8)",
+    "source": "https://images.unsplash.com/photo-1444021465936-c6ca81d39b84"
+  },
+  "rose-blush-wall": {
+    "key": "rose-blush-wall",
+    "alt": "A single pink rose in a glass bottle against a blush wall",
+    "width": 2200,
+    "height": 3294,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRnoAAABXRUJQVlA4IG4AAADwBACdASoUAB4APt1apE2opSOmN/qoARAbiWMAtOgh4Q1uN7FrcOjEupki7udPtgAA/uQe8p7sIZiKRI0+7hiafg7URPkCu8bzTfW8GO78VXGMxlCkuuXyJDFGEQVSnjRbs1YYB5b1319V1hAAAA==",
+    "color": "rgb(56 40 40)",
+    "source": "https://images.unsplash.com/photo-1518895949257-7621c3c786d7"
+  },
+  "peony": {
+    "key": "peony",
+    "alt": "Pink peony in full bloom on white",
+    "width": 2200,
+    "height": 3312,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRnYAAABXRUJQVlA4IGoAAADwBACdASoUAB4APu1krE4ppaSiKA1RMB2JaADO7EXfj3dj4x+sxRxP39wDvHIazWAA/vfjtcjKn2UaTdUHdbdEVKdfem9VoPwCPUqGMJwPZE6idY14lFQnonai2jTImPTAYvY7tpdAAAAA",
+    "color": "rgb(248 248 248)",
+    "source": "https://images.unsplash.com/photo-1527061011665-3652c757a4d4"
+  },
+  "heart-flowers": {
+    "key": "heart-flowers",
+    "alt": "Hands holding a heart-shaped arrangement of pink and yellow flowers",
+    "width": 2200,
+    "height": 2200,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRmoAAABXRUJQVlA4IF4AAADQBACdASoUABQAPu1gp04ppSMiMBgMATAdiWIAsR9kAalU8fFtXxWpLp5RZd7OIAD+7VXyGpz15jK7kkNkYYwI/hUjTk6X73jNoYwYDiZ0ScLMdV1cHknGXCnhOS4A",
+    "color": "rgb(248 216 216)",
+    "source": "https://images.unsplash.com/photo-1526047932273-341f2a7631f9"
+  },
+  "moody-bouquet": {
+    "key": "moody-bouquet",
+    "alt": "Moody arrangement of red and orange blooms",
+    "width": 2200,
+    "height": 3520,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRo4AAABXRUJQVlA4IIIAAAAwBQCdASoUACAAPu1kqU2ppaQiMAgBMB2JYgCBeRsJuL3QoCl8M2zZ/rkoXEA3jm3L4AD++Sfcg4ysfn+0agjtwh4so2n11o78gYOArtDy/bITpy7NwqFDOGRs1NiEmrv7RCPzGObWIul6aEbKtAy6OZ2blWWjjSXludZCOgVOepAA",
+    "color": "rgb(24 24 24)",
+    "source": "https://images.unsplash.com/photo-1457089328109-e5d9bd499191"
+  },
+  "flower-market": {
+    "key": "flower-market",
+    "alt": "Buckets of fresh flowers outside a shopfront",
+    "width": 2200,
+    "height": 1468,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRl4AAABXRUJQVlA4IFIAAACwAwCdASoUAA0APu1iqU2ppaOiMAgBMB2JZQAAMgUbql//KhpHgAD46m7hLafAL3Y7PCjmhhT06gA7STxltq5WMEW/kOkcGsL081SAUjLrMWQA",
+    "color": "rgb(8 8 8)",
+    "source": "https://images.unsplash.com/photo-1487070183336-b863922373d4"
+  },
+  "pitcher-blooms": {
+    "key": "pitcher-blooms",
+    "alt": "Peonies and roses in a sage enamel pitcher with a gift tag",
+    "width": 2200,
+    "height": 1650,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRlAAAABXRUJQVlA4IEQAAACwAwCdASoUAA8APu1iqU2ppaOiMAgBMB2JZQAAWp+ErTS6jZACsAD+5x+gam9ZRk+hQGo5Pr2JYQoMpcNPMIBKNY9AAA==",
+    "color": "rgb(216 216 216)",
+    "source": "https://images.unsplash.com/photo-1452827073306-6e6e661baf57"
+  },
+  "rose-white": {
+    "key": "rose-white",
+    "alt": "White garden rose with dark green leaves",
+    "width": 2200,
+    "height": 2933,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRnYAAABXRUJQVlA4IGoAAAAwBQCdASoUABsAPuFYpk2opSOiN/qoARAcCWUAvOAZnu/vOEsneATU8Wwazbv16gMgAAD+nu13++SwBVRlx6nHbwF6jZYdYftK8KYUg1MTwgdknh1dmPicBIg+jolrNClHkZRWFSB7gAAA",
+    "color": "rgb(40 40 40)",
+    "source": "https://images.unsplash.com/photo-1495231916356-a86217efff12"
+  },
+  "lily": {
+    "key": "lily",
+    "alt": "Pink stargazer lily in a glass vase",
+    "width": 2200,
+    "height": 2200,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRmIAAABXRUJQVlA4IFYAAAAwBACdASoUABQAPu1or1CppaQiqAqpMB2JYwDKtBEc9QHiX3IeqDTuoQAA/up1syYYTq0PBG+7VM9jqkFFZVAS+SvuReCW/x06+eRIu1Brf8bcQBUAAA==",
+    "color": "rgb(232 232 232)",
+    "source": "https://images.unsplash.com/photo-1502977249166-824b3a8a4d6d"
+  },
+  "pink-dahlia": {
+    "key": "pink-dahlia",
+    "alt": "Vivid pink dahlia against a violet background",
+    "width": 2200,
+    "height": 1237,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRlwAAABXRUJQVlA4IFAAAACwAwCdASoUAAsAPu1iqU2ppaQiMAgBMB2JQBYdgs7wxctsNXroAAD+0M3OpFQ8teva/BIK0tCmNHeTz5WRgpJbBFBx8RmvaO6Uxg2gNhQAAA==",
+    "color": "rgb(8 24 56)",
+    "source": "https://images.unsplash.com/photo-1507290439931-a861b5a38200"
+  },
+  "blossom": {
+    "key": "blossom",
+    "alt": "Pale cherry blossoms against a soft sky",
+    "width": 2200,
+    "height": 3300,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRlIAAABXRUJQVlA4IEYAAAAwAwCdASoUAB4APu1kqk2ppaQsMAgBgB2JYwDH5ClnGGp8AP7ubf4btIhu5bFIy/PV7eoyOXm0rrFqJP0UTHo43DzaXKAA",
+    "color": "rgb(200 216 232)",
+    "source": "https://images.unsplash.com/photo-1522748906645-95d8adfd52c7"
+  },
+  "bride-moody": {
+    "key": "bride-moody",
+    "alt": "Bride holding a bouquet in warm, low light",
+    "width": 2200,
+    "height": 1467,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRloAAABXRUJQVlA4IE4AAADQAwCdASoUAA0APu1oqk6ppiQiMAgBMB2JZQC7ABulFAgwquRaKaQA/ujuTXX4KQJzwoSJDL1JIprFV/Q7fl32GgIyLIrf64jKhSQAAAA=",
+    "color": "rgb(24 24 24)",
+    "source": "https://images.unsplash.com/photo-1519741497674-611481863552"
+  },
+  "bride-bouquet-blush": {
+    "key": "bride-bouquet-blush",
+    "alt": "Bridal bouquet of blush roses and white blooms",
+    "width": 2200,
+    "height": 3300,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRnAAAABXRUJQVlA4IGQAAAAQBQCdASoUAB4APuVepk2pJSOiN/VYASAciWIAtSFAAGZ5b0G90aWYsxvSVRI5fYwAAP6NPPHzZoK5y7sT909RRRsn210PoHx5oqnlLllnruMJFKx93+TDSeUt2NPKOPj7AAAA",
+    "color": "rgb(232 232 232)",
+    "source": "https://images.unsplash.com/photo-1525258946800-98cfd641d0de"
+  },
+  "couple-bouquet": {
+    "key": "couple-bouquet",
+    "alt": "Bride holding a peach and sage bouquet beside the groom",
+    "width": 2200,
+    "height": 1469,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRl4AAABXRUJQVlA4IFIAAAAQBACdASoUAA0APu1kqU2ppaQiMAgBMB2JQBOmUABR+UE3kBxWmqKXgAD+mHPWiMuRkGfq0C0HrZGiz87zLhxsQzJ6hTBmKPAKnq2bHMvFLGAA",
+    "color": "rgb(216 216 216)",
+    "source": "https://images.unsplash.com/photo-1550005809-91ad75fb315f"
+  },
+  "couple-autumn": {
+    "key": "couple-autumn",
+    "alt": "Couple smiling outdoors, the bride holding an autumn-toned bouquet",
+    "width": 2200,
+    "height": 1467,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRl4AAABXRUJQVlA4IFIAAAAQBACdASoUAA0APu1iqk2ppaQiMAgBMB2JQBOmUABbec7rsutcI9sR0gDM9sCgKGNkql208FT6XjziEIwjerZT0fHsEQgcF4rd+5EVY0dXQzgA",
+    "color": "rgb(216 216 216)",
+    "source": "https://images.unsplash.com/photo-1591604466107-ec97de577aff"
+  },
+  "aisle": {
+    "key": "aisle",
+    "alt": "Outdoor ceremony aisle lined with floral arrangements",
+    "width": 2200,
+    "height": 1468,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRmYAAABXRUJQVlA4IFoAAAAwBACdASoUAA0APu1kqk4ppaQiMAgBMB2JYgCdMoMjbCcwsA/98IEKMoAA/rUTPj+c1TWDQUlRkUb34E7CW98eJlS4a533sxwrD706htNfajrS8+LvhBEw0AA=",
+    "color": "rgb(216 200 168)",
+    "source": "https://images.unsplash.com/photo-1469371670807-013ccf25f16a"
+  },
+  "gazebo": {
+    "key": "gazebo",
+    "alt": "Garden ceremony gazebo dressed with flowers and white chairs",
+    "width": 2200,
+    "height": 3300,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRoYAAABXRUJQVlA4IHoAAABQBQCdASoUAB4APu1mqU4ppaOiMAgBMB2JYwC3uB6XQ6Gw5nO/qNEmsPDpfVIolA93BcAA/tlDDzpNtoL2enJfHvISfLsxFFL0RmvYqOqnYnGDnptSWnsj45nJtBosLMpc6e57Ct6jxlkPEAeVXFW9N4jjdWc6fQAAAA==",
+    "color": "rgb(8 8 8)",
+    "source": "https://images.unsplash.com/photo-1523438885200-e635ba2c371e"
+  },
+  "chairs-florals": {
+    "key": "chairs-florals",
+    "alt": "Two ceremony chairs decorated with florals on a lawn",
+    "width": 2200,
+    "height": 1467,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRlQAAABXRUJQVlA4IEgAAADwAwCdASoUAA0APu1kqU2ppaQiMAgBMB2JZgC1GoADS+3suk5hqDeAAP7fNjYK+KF9QLI6nviW1fF9L4XcwXGkBHa1rQkAAAA=",
+    "color": "rgb(232 232 232)",
+    "source": "https://images.unsplash.com/photo-1522673607200-164d1b6ce486"
+  },
+  "reception-table": {
+    "key": "reception-table",
+    "alt": "Reception table with bud vases and garden flowers",
+    "width": 2200,
+    "height": 1467,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRloAAABXRUJQVlA4IE4AAAAwBACdASoUAA0APu1oqk6ppiQiMAgBMB2JYwCw7CLGqlERz3NfKxi2dgAA/lmSnrw0CX0R4sW0HfvjT8L5pDlv7CLiaeOH9VLWbd8VkAA=",
+    "color": "rgb(216 216 216)",
+    "source": "https://images.unsplash.com/photo-1519225421980-715cb0215aed"
+  },
+  "tablescape": {
+    "key": "tablescape",
+    "alt": "Formal table setting with glassware, linens and soft light",
+    "width": 2200,
+    "height": 1466,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRlYAAABXRUJQVlA4IEoAAADQAwCdASoUAA0APu1kqU2ppaQiMAgBMB2JYwCdABnw8i4ggnaYpCAA+c1ltEQQSAzkWvr17Xm9Hl879XLWugSQ3MeCXgVGCgAAAA==",
+    "color": "rgb(248 232 216)",
+    "source": "https://images.unsplash.com/photo-1561912774-79769a0a0a7a"
+  },
+  "toast-lights": {
+    "key": "toast-lights",
+    "alt": "Guests raising a toast beneath warm string lights",
+    "width": 2200,
+    "height": 1467,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRlgAAABXRUJQVlA4IEwAAACwAwCdASoUAA0APu1kqk4ppaQiMAgBMB2JQBOgA80KK0Ed4aOdQADfZSmXMVDfjIwzq1bkCzY/bwzII/3FJkBmxoPDimxZOPKmWyAA",
+    "color": "rgb(24 24 24)",
+    "source": "https://images.unsplash.com/photo-1527529482837-4698179dc6ce"
+  },
+  "ballroom": {
+    "key": "ballroom",
+    "alt": "Ballroom with draped linens, chandeliers and gold chairs",
+    "width": 2200,
+    "height": 1421,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRlwAAABXRUJQVlA4IFAAAADwAwCdASoUAA0APu1iqU2ppaQiMAgBMB2JQBYja8cABHgzx9Kb0vIAAP4jRw3kxTXFYgCAF/Z0aQQ9owfEVBY+/yfDAgIwaIKuOXbQkI4AAA==",
+    "color": "rgb(88 56 40)",
+    "source": "https://images.unsplash.com/photo-1519167758481-83f550bb49b3"
+  },
+  "stage-drapery": {
+    "key": "stage-drapery",
+    "alt": "Ceremony stage framed with drapery, florals and warm lighting",
+    "width": 2200,
+    "height": 1467,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRmYAAABXRUJQVlA4IFoAAAAwBACdASoUAA0APu1iqU2ppaQiMAgBMB2JZACdLoBbgAj6tILOfa5lK6AA/kCB88rird37atQQTEr6oKWxNW/rvFpRrrQuNephXVvFYbKke1XtUjp5AHNAAAA=",
+    "color": "rgb(136 40 8)",
+    "source": "https://images.unsplash.com/photo-1587271407850-8d438ca9fdf2"
+  },
+  "rings-roses": {
+    "key": "rings-roses",
+    "alt": "Couple's hands with wedding rings beside peach roses",
+    "width": 2200,
+    "height": 1467,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRloAAABXRUJQVlA4IE4AAACwAwCdASoUAA0APu1iqU2ppaOiMAgBMB2JQBOgAgflDxDmiOB4AAD+tR1Ul9iM8VvPT1tJ7JIYFtr1pK4dc3YYF0/IhtY/mQhvBXngAAA=",
+    "color": "rgb(232 232 232)",
+    "source": "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6"
+  },
+  "rings-blooms": {
+    "key": "rings-blooms",
+    "alt": "Wedding rings resting on soft pink blooms",
+    "width": 2200,
+    "height": 1467,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRlYAAABXRUJQVlA4IEoAAADwAwCdASoUAA0APu1orU6ppiSiMAgBMB2JZQC/OCPybubRA30X0q5QAP7FXIiQnEiOKs/v3RxReLwug2tFuG2JG0kSSP4uVVMAAA==",
+    "color": "rgb(216 232 232)",
+    "source": "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8"
+  },
+  "curtain-couple": {
+    "key": "curtain-couple",
+    "alt": "Black-and-white photo of a couple framed by sheer drapery",
+    "width": 2200,
+    "height": 1466,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRl4AAABXRUJQVlA4IFIAAADwAwCdASoUAA0APu1kqU2ppaQiMAgBMB2JaQAAUVwccoxCm65KmfAAAP7vjUmkBAkmkAnppEid9jjux3fXuV4bEGj2ep9ZvRTNyoox/+zjAAAA",
+    "color": "rgb(8 8 8)",
+    "source": "https://images.unsplash.com/photo-1520342868574-5fa3804e551c"
+  },
+  "petal-exit": {
+    "key": "petal-exit",
+    "alt": "Newlyweds walking through a shower of petals",
+    "width": 2200,
+    "height": 1467,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRmAAAABXRUJQVlA4IFQAAACQAwCdASoUAA0APu1kq04ppaQiMAgBMB2JQBOgAr0pcx/Xk4AAAP7QsbOJKyhpJi/QeVWF7C9bdyNyAR41MZHO4a3oc8jF73146vA526HXS4VPwAA=",
+    "color": "rgb(8 8 8)",
+    "source": "https://images.unsplash.com/photo-1595407753234-0882f1e77954"
+  },
+  "sign": {
+    "key": "sign",
+    "alt": "Wooden Mr & Mrs sign among greenery",
+    "width": 2200,
+    "height": 1467,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRmAAAABXRUJQVlA4IFQAAAAwBACdASoUAA0APu1kqk4ppaQiMAgBMB2JZQC7AB7Gp/ycAOn1i5k7A/gA/CD/mtDJyzrFSgarekYsHbJsWt/bSUpE64OGklw3iul5JSQ7kPAkgAA=",
+    "color": "rgb(248 248 248)",
+    "source": "https://images.unsplash.com/photo-1507504031003-b417219a0fde"
+  },
+  "veil": {
+    "key": "veil",
+    "alt": "Black-and-white photo of a couple kissing beneath a veil",
+    "width": 2200,
+    "height": 1283,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRlwAAABXRUJQVlA4IFAAAADQAwCdASoUAAwAPu1iqU2ppaOiMAgBMB2JaQAANgGwhM96PFTrOSAA/rYUjbG2INByVK8iKgLuk/dAUugm38RG+64JDRQ3fUgopoQ/vjdEAA==",
+    "color": "rgb(216 216 216)",
+    "source": "https://images.unsplash.com/photo-1460978812857-470ed1c77af0"
+  },
+  "hands": {
+    "key": "hands",
+    "alt": "Bride and groom holding hands",
+    "width": 2200,
+    "height": 1467,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRmQAAABXRUJQVlA4IFgAAADQAwCdASoUAA0APu1iqk2ppaQiMAgBMB2JZQC7ABmcKdrfTH+fH2AA/a3mm9aFxsiuFeddnXV+8XxwBJmiAW56vEdjdMxhMjP98ZJ27q8taETkIhOsgAAA",
+    "color": "rgb(8 8 8)",
+    "source": "https://images.unsplash.com/photo-1520854221256-17451cc331bf"
+  },
+  "candle": {
+    "key": "candle",
+    "alt": "Lit candle in a glass among soft textures",
+    "width": 2200,
+    "height": 3299,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRoYAAABXRUJQVlA4IHoAAAAwBQCdASoUAB4APu1eqk2ppSQiMBgMATAdiUAWo2X4pEAUv3dogy8lYJOVaHWJjMjNIAD+9ogDFv678SkGVCnxQjS9UH8+tzU4cjIt3NHRxCLqFSzREO2hz94YZze4EbZLrCMWuadeSuPOZNTpBMZvT1nL/4XnGpUAAA==",
+    "color": "rgb(24 24 8)",
+    "source": "https://images.unsplash.com/photo-1603006905003-be475563bc59"
+  },
+  "knits": {
+    "key": "knits",
+    "alt": "Neutral knitwear on a rail beside pampas grass",
+    "width": 2200,
+    "height": 1650,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRlIAAABXRUJQVlA4IEYAAACwAwCdASoUAA8APu1kq04ppaQiMAgBMB2JZQC7AB3b+Jl5Q1PAgAD+5z8kPV8noAg9Lsy96y4Pk2qKaOg6HtWHUYI+AAAA",
+    "color": "rgb(216 216 200)",
+    "source": "https://images.unsplash.com/photo-1558769132-cb1aea458c5e"
+  },
+  "rack-light": {
+    "key": "rack-light",
+    "alt": "Light, airy clothing on wooden hangers",
+    "width": 2200,
+    "height": 1467,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRkwAAABXRUJQVlA4IEAAAADQAwCdASoUAA0APu1iqk2ppaQiMAgBMB2JZwC7ACHfwf5nHdyroBAA/uc0pTtNKFmkjuQuG1OHt8yiwXMTYAAA",
+    "color": "rgb(216 216 200)",
+    "source": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d"
+  },
+  "rack-warm": {
+    "key": "rack-warm",
+    "alt": "Warm-toned clothing hanging on a rail",
+    "width": 2200,
+    "height": 1467,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRmQAAABXRUJQVlA4IFgAAABwAwCdASoUAA0APu1iqk2ppaQiMAgBMB2JYgCdAAeoat7G7cAA/rvrrZBP9CesRshZvJ6YTlLMjdGukuQMJG1OaiG82taZEpfViy6SCA211y2NQGk6AAAA",
+    "color": "rgb(8 24 24)",
+    "source": "https://images.unsplash.com/photo-1445205170230-053b83016050"
+  },
+  "sage-shirts": {
+    "key": "sage-shirts",
+    "alt": "Sage green garments on wooden hangers",
+    "width": 2200,
+    "height": 1467,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRlYAAABXRUJQVlA4IEoAAADQAwCdASoUAA0APu1kq04ppaQiMAgBMB2JYwCo9Bbzk4/EXPkahJoAyUv57Wf4j9FxvSPEYwFU3JB1TKnMA7AN5cEEhcvmnaxwAA==",
+    "color": "rgb(104 120 120)",
+    "source": "https://images.unsplash.com/photo-1523381210434-271e8be1f52b"
+  },
+  "gift-pink": {
+    "key": "gift-pink",
+    "alt": "Pink gift box tied with gold ribbon and confetti",
+    "width": 2200,
+    "height": 1520,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRlwAAABXRUJQVlA4IFAAAAAQBACdASoUAA4APu1iqk4ppaQiMAgBMB2JbACdMoADTr3YvLD2F3fIAAD+3plfBCukusJUyAqRgwR9+ktEg0z6O3bsTQqxAGRxf7tD9roAAA==",
+    "color": "rgb(216 184 168)",
+    "source": "https://images.unsplash.com/photo-1549465220-1a8b9238cd48"
+  },
+  "gift-held": {
+    "key": "gift-held",
+    "alt": "Hands holding a kraft-wrapped gift tied with twine",
+    "width": 2200,
+    "height": 1467,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRlAAAABXRUJQVlA4IEQAAADQAwCdASoUAA0APu1iqk2ppaQiMAgBMB2JZQCw7BSD0LWVKxwdnAAA/oNH+8rXmgiVMVTj4Fis/oMhF9K9qJykAWgAAA==",
+    "color": "rgb(24 24 24)",
+    "source": "https://images.unsplash.com/photo-1512909006721-3d6018887383"
+  },
+  "home-boho": {
+    "key": "home-boho",
+    "alt": "Bohemian home décor with macramé, pampas and a potted cactus",
+    "width": 2200,
+    "height": 2750,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRoQAAABXRUJQVlA4IHgAAAAwBQCdASoUABkAPu1gq02ppSQiMBgMATAdiUAW2Qr+F4alHK8lJbeuvWszmnThqO6QAAD+837Pp3ZUSuZOrNvhlxI1dUo3jEyaNsthUYDUL59K4j4fvS7jpPFKZ2XkmHouabPbdN61EqpdhhgxsOCaMy7DqsJAAAA=",
+    "color": "rgb(232 232 232)",
+    "source": "https://images.unsplash.com/photo-1558603668-6570496b66f8"
+  },
+  "home-living": {
+    "key": "home-living",
+    "alt": "Living room with woven pendant lights and soft textiles",
+    "width": 2200,
+    "height": 2200,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRmwAAABXRUJQVlA4IGAAAACQBACdASoUABQAPulcp02pJSOiN/VYASAdCWMAuwAPQxb/nnABLSRSYsvt9gAA/jLo1hZZLYqawDuKi9siqrToqy6E2SDu1k6Ip1v7QIcXyFiAQ7k9v6HR3yX4baAAAAA=",
+    "color": "rgb(120 104 88)",
+    "source": "https://images.unsplash.com/photo-1615529182904-14819c35db37"
+  },
+  "home-neutral": {
+    "key": "home-neutral",
+    "alt": "Neutral living room with textured wall décor",
+    "width": 2200,
+    "height": 1238,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRlAAAABXRUJQVlA4IEQAAADwAwCdASoUAAsAPu1kqk4ppaQiMAgBMB2JZQDCgBtIRgfkYFAJImgAAP5ehNgXHT95EOyDMlsenNMF9APpH8zoR9YAAA==",
+    "color": "rgb(184 184 168)",
+    "source": "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace"
+  },
+  "autumn-leaves": {
+    "key": "autumn-leaves",
+    "alt": "Autumn leaves pinned along a string",
+    "width": 2200,
+    "height": 1467,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRl4AAABXRUJQVlA4IFIAAADQAwCdASoUAA0APu1kq04ppaQiMAgBMB2JZgCdMoAC9fdqWxLJPAAA/o03plO1jlAk+TzL2TNeCyNmTwqw1iPkAUm5xmgaVGN/l1GZENxcVoAA",
+    "color": "rgb(216 200 184)",
+    "source": "https://images.unsplash.com/photo-1477414348463-c0eb7f1359b6"
+  },
+  "boutique-interior": {
+    "key": "boutique-interior",
+    "alt": "Bright boutique interior with clothing rails",
+    "width": 2200,
+    "height": 1468,
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "lqip": "data:image/webp;base64,UklGRloAAABXRUJQVlA4IE4AAAAQBACdASoUAA0APu1mqk4ppaOiMAgBMB2JZwC7ACHuxuEbOCgI7ZXTgAD+i8mruSb3iEqtPJZVwzJSFmiMX5ndFiq8fZXWOONqv1b3AAA=",
+    "color": "rgb(8 8 8)",
+    "source": "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04"
+  }
+}

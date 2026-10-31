@@ -11,7 +11,7 @@ import { business, fullAddress } from '../src/data/business.ts';
 
 const root = path.resolve(import.meta.dirname, '..');
 const dist = path.join(root, 'dist');
-const SITE_URL = (process.env.SITE_URL || 'https://blooms-boutique-concept.pages.dev').replace(/\/$/, '');
+const SITE_URL = (process.env.SITE_URL || 'https://abraxas-blooms-concept.pages.dev').replace(/\/$/, '');
 const production = process.env.SITE_MODE === 'production';
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

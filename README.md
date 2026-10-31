@@ -33,7 +33,7 @@ React 19 · TypeScript · Vite 7 · Tailwind CSS 4 · Motion 12 · Lenis · Reac
 
 Build switches:
 
-- `SITE_URL` — absolute origin for canonical and Open Graph URLs (default `https://blooms-boutique-concept.pages.dev`).
+- `SITE_URL` — absolute origin for canonical and Open Graph URLs (default `https://abraxas-blooms-concept.pages.dev`).
 - `SITE_MODE=production` (or `npm run build:production`) — removes the preview `noindex` directives and opens `robots.txt`. Only use this for an owner-approved launch.
 
 ## Where things live

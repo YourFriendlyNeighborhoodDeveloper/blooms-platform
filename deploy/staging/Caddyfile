@@ -1,0 +1,28 @@
+# The staging proxy. https://localhost:8443 serves this machine with a local certificate, and the
+# optional tunnel reaches the plain :80 site inside the Docker network, with TLS at Cloudflare's edge.
+{
+	local_certs
+	skip_install_trust
+}
+
+(app) {
+	encode zstd gzip
+	log {
+		output stdout
+		format json
+	}
+	handle /mailbox* {
+		reverse_proxy mailpit:8025
+	}
+	handle {
+		reverse_proxy web:8787
+	}
+}
+
+localhost {
+	import app
+}
+
+:80 {
+	import app
+}

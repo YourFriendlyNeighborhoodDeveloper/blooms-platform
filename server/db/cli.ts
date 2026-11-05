@@ -29,7 +29,20 @@ async function main() {
     } else if (command === 'seed-demo') {
       if (env.isProduction) throw new Error('Demo data is never loaded in production.');
       const { seedDemo } = await import('./seed-demo.js');
-      await seedDemo(db, { log, password: process.env.DEMO_PASSWORD || undefined });
+      const password = process.env.DEMO_PASSWORD || undefined;
+      const seeded = await seedDemo(db, { log, password });
+      if (args.includes('--stories')) {
+        if (!seeded) throw new Error('Demo stories need a freshly seeded demo database and its staff password. Reset first.');
+        const { createContext } = await import('../context.js');
+        const { runDemoStories } = await import('./demo-stories.js');
+        const { createLogger } = await import('../lib/logger.js');
+        const ctx = createContext(env, { log: createLogger({ env: env.APP_ENV }, { silent: true }) });
+        try {
+          await runDemoStories(ctx, { password: seeded.password, log });
+        } finally {
+          await ctx.db.destroy();
+        }
+      }
     } else if (command === 'check') {
       const { checkIntegrity } = await import('../modules/system/integrity.js');
       const report = await checkIntegrity(db);

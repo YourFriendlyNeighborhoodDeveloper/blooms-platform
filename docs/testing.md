@@ -31,6 +31,15 @@ S3_TEST_ENDPOINT=http://127.0.0.1:9100 npm test
 CI (`.github/workflows/ci.yml`) runs stripe-mock and Mailpit as services, so the Stripe and SMTP
 checks run on every push.
 
+### Checking a staging deployment from outside
+
+`scripts/staging.sh verify` runs `e2e/staging/` against the running staging deployment, as a customer
+on a phone-sized screen and as the owner. It covers the full order journey with the tracking page
+following each staff step, pending, failed and abandoned payments, duplicate confirmations, a partial
+refund, a wedding plan through to a confirmed project, the fully booked date, the shop's protective
+rules, role limits, and that no secret reaches the browser. It never resets data. It adds fictional
+test orders, which `scripts/staging.sh reset` removes. Credentials are passed in for the run only.
+
 ## What is covered
 
 | Layer | File | What it proves |

@@ -14,13 +14,38 @@ import { setApproval, updateSetting } from '../modules/settings/service.js';
 
 const EXAMPLE_NOTE = 'Demo data with example pricing. Replace before accepting real customers.';
 
+const ROSES = (stems: number) => [{ item: 'MAT-ROSE-STEM', quantity: stems }, { item: 'MAT-GREENS', quantity: 1 }, { item: 'MAT-WRAP', quantity: 1 }];
+
 const PRODUCTS: Array<{
   slug: string; name: string; division: 'floral' | 'boutique'; category: string; short: string; description: string; image: string; alt: string;
-  variants: Array<{ name: string; price: number; sale?: number; cost?: number; stock?: number | null; low?: number }>;
+  variants: Array<{ name: string; price: number; sale?: number; cost?: number; stock?: number | null; low?: number; recipe?: Array<{ item: string; quantity: number }> }>;
   prep?: number; points?: number; lead?: number; pickup?: boolean; delivery?: boolean; shipping?: boolean; custom?: boolean; approval?: boolean; featured?: boolean; season?: [string, string]; outOfStock?: 'reject' | 'review' | 'backorder';
   options?: Array<{ code: string; label: string; input_type: 'select' | 'multiselect' | 'text' | 'textarea'; required?: boolean; choices?: unknown[]; max_length?: number; help_text?: string }>;
   recipe?: Array<{ item: string; quantity: number }>;
 }> = [
+  {
+    slug: 'demo-classic-roses', name: 'Classic Rose Bouquet (demo)', division: 'floral', category: 'bouquets', short: 'Long-stem roses, hand-tied with fresh greenery.', description: 'A timeless dozen, or two, in the color you choose, wrapped and ready to give.',
+    image: '/img/rose-blush-wall-1280.webp', alt: 'A wall of blush roses', featured: true, prep: 25, points: 2, delivery: true, pickup: true,
+    variants: [{ name: 'A dozen', price: 7500, cost: 2600, recipe: ROSES(12) }, { name: 'Two dozen', price: 13500, cost: 4800, recipe: ROSES(24) }],
+    options: [
+      { code: 'rose_color', label: 'Rose color', input_type: 'select', required: true, choices: [{ value: 'Red' }, { value: 'Blush' }, { value: 'White' }, { value: 'Mixed' }] },
+      { code: 'card_message', label: 'Card message', input_type: 'textarea', max_length: 200, help_text: 'Printed on a small card, up to 200 characters.' },
+    ],
+  },
+  {
+    slug: 'demo-premium-mixed', name: 'Premium Mixed Arrangement (demo)', division: 'floral', category: 'arrangements', short: 'A generous designer\'s choice, arranged in a keepsake vessel.', description: 'Our florists choose the best of the week: garden roses, seasonal blooms and textured greenery, arranged to last.',
+    image: '/img/pitcher-blooms-1280.webp', alt: 'A full arrangement in a pitcher', featured: true, prep: 60, points: 4, lead: 24, delivery: true, pickup: true,
+    variants: [{ name: 'Standard', price: 12500, cost: 4900 }, { name: 'Grand', price: 17500, cost: 6900 }],
+    options: [{ code: 'card_message', label: 'Card message', input_type: 'textarea', max_length: 200 }],
+    recipe: [{ item: 'MAT-ROSE-STEM', quantity: 10 }, { item: 'MAT-GREENS', quantity: 2 }],
+  },
+  {
+    slug: 'demo-seasonal-centerpiece', name: 'Seasonal Centerpiece (demo)', division: 'floral', category: 'arrangements', short: 'A low table arrangement for this season.', description: 'Low enough to talk over, full enough to fill the table. Optional taper candles.',
+    image: '/img/tablescape-1280.webp', alt: 'A dressed table with a low floral centerpiece', prep: 45, points: 3, delivery: true, pickup: true,
+    variants: [{ name: 'Standard', price: 8500, cost: 3100 }],
+    options: [{ code: 'candles', label: 'Candles', input_type: 'select', choices: [{ value: 'No candles' }, { value: 'With taper candles', price_delta_cents: 1500 }] }],
+    recipe: [{ item: 'MAT-ROSE-STEM', quantity: 6 }, { item: 'MAT-GREENS', quantity: 1 }],
+  },
   {
     slug: 'demo-garden-bouquet', name: 'Garden Bouquet (demo)', division: 'floral', category: 'bouquets', short: 'A loose, hand-tied mix in soft seasonal colors.', description: 'Hand-tied from what looks best that week, wrapped in paper and ribbon. Each one differs a little.',
     image: '/img/bouquet-lush-1280.webp', alt: 'A lush hand-tied bouquet', featured: true, prep: 30, points: 2, delivery: true, pickup: true,
@@ -50,7 +75,7 @@ const PRODUCTS: Array<{
     variants: [{ name: 'Standard', price: 8500, cost: 4200 }],
   },
   {
-    slug: 'demo-custom-arrangement', name: 'Custom Arrangement (demo)', division: 'floral', category: 'arrangements', short: 'Tell us the occasion and the colors.', description: 'A piece designed around your request. The shop reviews each one before accepting it.',
+    slug: 'demo-custom-design', name: 'Custom Floral Design (demo)', division: 'floral', category: 'arrangements', short: 'Tell us the occasion and the colors.', description: 'A piece designed around your request. The shop reviews each one before accepting it.',
     image: '/img/moody-bouquet-1280.webp', alt: 'A moody dark-toned bouquet', custom: true, approval: true, prep: 90, points: 6, lead: 72, delivery: true, pickup: true,
     variants: [{ name: 'Standard', price: 15000, cost: 6000 }],
     options: [
@@ -95,6 +120,7 @@ const SERVICES = [
   { code: 'demo-ceremony-arch', category: 'installations', name: 'Ceremony arch florals (demo)', description: 'Flowers designed for your arch or backdrop.', mode: 'custom_quote', unit: 'each', points: 12, setup: 90, crew: true, image: '/img/gazebo-1280.webp' },
   { code: 'demo-aisle-flowers', category: 'ceremony', name: 'Aisle arrangements (demo)', description: 'Low arrangements lining the aisle.', mode: 'estimate', low: 4500, high: 9500, unit: 'each', points: 2, setup: 10, crew: true, image: '/img/aisle-1280.webp' },
   { code: 'demo-centerpieces', category: 'reception', name: 'Reception centerpieces (demo)', description: 'From low and lush to tall and dramatic.', mode: 'estimate', low: 6500, high: 18000, unit: 'table', points: 3, setup: 10, crew: true, image: '/img/tablescape-1280.webp' },
+  { code: 'demo-reception-package', category: 'reception', name: 'Reception centerpiece package (demo)', description: 'Ten matching centerpieces, set on the tables before guests arrive.', mode: 'package', price: 95000, unit: 'package', points: 10, setup: 60, crew: true, image: '/img/reception-table-1280.webp' },
   { code: 'demo-sweetheart-table', category: 'reception', name: 'Sweetheart table (demo)', description: 'Garlands and candles for the two of you.', mode: 'custom_quote', unit: 'each', points: 5, setup: 30, crew: true, image: '/img/reception-table-1280.webp' },
   { code: 'demo-setup-teardown', category: 'logistics', name: 'Delivery, setup and teardown (demo)', description: 'We bring it, place it, and take it away.', mode: 'estimate', low: 25000, high: 90000, unit: 'event', points: 4, crew: true, image: '/img/ballroom-1280.webp' },
 ] as const;
@@ -102,7 +128,7 @@ const SERVICES = [
 const RENTALS = [
   { name: 'Birch ceremony arch (demo)', category: 'Arches', quantity: 2, price: 15000, buffer: 240, replacement: 60000, delivery: true, image: '/img/gazebo-1280.webp', description: 'A freestanding birch arch.' },
   { name: 'Gold candelabra (demo)', category: 'Décor', quantity: 12, price: 2500, buffer: 120, replacement: 9000, delivery: true, image: '/img/toast-lights-1280.webp', description: 'Tall five-arm candelabra.' },
-  { name: 'Glass bud vases (demo)', category: 'Tableware', quantity: 120, price: 200, buffer: 60, replacement: 500, delivery: false, image: '/img/arrangement-jar-1280.webp', description: 'Assorted small vases.' },
+  { name: 'Decorative vases (demo)', category: 'Tableware', quantity: 120, price: 200, buffer: 60, replacement: 500, delivery: false, image: '/img/arrangement-jar-1280.webp', description: 'Assorted small vases.' },
   { name: 'Velvet ring box (demo)', category: 'Details', quantity: 3, price: 800, buffer: 30, replacement: 3000, delivery: false, image: '/img/rings-roses-1280.webp', description: 'A small keepsake box for the rings.' },
 ];
 
@@ -131,7 +157,7 @@ export async function seedDemo(db: Db, opts: { log: (m: string) => void; passwor
   const already = await db.selectFrom('products').select('id').where('is_demo', '=', true).limit(1).executeTakeFirst();
   if (already) {
     log('Demo data is already loaded. Run npm run db:reset first to start over.');
-    return;
+    return null;
   }
 
   const actor = SYSTEM_ACTOR;
@@ -156,7 +182,7 @@ export async function seedDemo(db: Db, opts: { log: (m: string) => void; passwor
   for (let weekday = 1; weekday <= 6; weekday++) {
     await db.insertInto('delivery_windows').values({ kind: 'pickup', weekday, start_time: '10:00', end_time: '17:30', cutoff_minutes: 0 }).execute();
     for (const zoneId of [zone.id, far.id]) {
-      await db.insertInto('delivery_windows').values({ kind: 'delivery', zone_id: zoneId, weekday, start_time: '10:00', end_time: '13:00', cutoff_minutes: 120, max_stops: 6 }).execute();
+      await db.insertInto('delivery_windows').values({ kind: 'delivery', zone_id: zoneId, weekday, start_time: '10:00', end_time: '13:00', cutoff_minutes: 120, max_stops: weekday === 6 ? 3 : 6 }).execute();
       await db.insertInto('delivery_windows').values({ kind: 'delivery', zone_id: zoneId, weekday, start_time: '14:00', end_time: '17:00', cutoff_minutes: 120, max_stops: 6 }).execute();
     }
   }
@@ -216,6 +242,10 @@ export async function seedDemo(db: Db, opts: { log: (m: string) => void; passwor
         .values({ product_id: product.id, sku, name: variant.name, price_cents: variant.price, sale_price_cents: variant.sale ?? null, cost_estimate_cents: variant.cost ?? null, sort_order: v })
         .returning('id')
         .executeTakeFirstOrThrow();
+      if (variant.recipe) {
+        const recipe = await db.insertInto('product_recipes').values({ variant_id: row.id, name: `${p.name}, ${variant.name}` }).returning('id').executeTakeFirstOrThrow();
+        for (const c of variant.recipe) await db.insertInto('recipe_components').values({ recipe_id: recipe.id, item_id: items[c.item], quantity: c.quantity }).execute();
+      }
       if (variant.stock !== undefined && variant.stock !== null) {
         const item = await db.insertInto('inventory_items').values({ sku: `INV-${sku}`, name: `${p.name}, ${variant.name}`, division_id: divisions[p.division], kind: 'finished_good', variant_id: row.id, low_stock_threshold: variant.low ?? null, cost_cents: variant.cost ?? null }).returning('id').executeTakeFirstOrThrow();
         await db.insertInto('inventory_levels').values({ item_id: item.id, location_id: location }).execute();
@@ -248,4 +278,5 @@ export async function seedDemo(db: Db, opts: { log: (m: string) => void; passwor
   for (const s of STAFF) log(`  ${s.email.padEnd(28)} ${s.roles.join(', ')}`);
   log(opts.password ? '  Password: the DEMO_PASSWORD you provided' : `  Password for all of them: ${password}`);
   log('');
+  return { password };
 }

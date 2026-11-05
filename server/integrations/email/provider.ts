@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import type { Env } from '../../config/env.js';
+import { isAllowlisted, type Env } from '../../config/env.js';
 import type { Logger } from '../../lib/logger.js';
 
 export type EmailMessage = {
@@ -98,7 +98,7 @@ function guarded(inner: EmailProvider, env: Env, log: Logger): EmailProvider {
     name: inner.name,
     deliversForReal: inner.deliversForReal,
     async send(m) {
-      if (!env.messageAllowlist.includes(m.to.toLowerCase())) {
+      if (!isAllowlisted(env, m.to)) {
         log.info('email blocked by non-production allowlist', { subject: m.subject });
         return { provider: inner.name, message_id: null, status: 'skipped', reason: 'Recipient is not on MESSAGE_ALLOWLIST outside production' };
       }

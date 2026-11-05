@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router';
 import { api } from '../../lib/api';
 import { money } from '../../lib/format';
 import { CatalogSetup } from '../components/CatalogSetup';
+import { ProductImport } from '../components/ProductImport';
 import { Badge, Btn, Card, Field, Input, Loader, Modal, PageHeader, Select, StatusBadge, Table, useAction, useLoad, type Column } from '../ui';
 
 type Variant = { id: string; name: string; sku: string; price_cents: number; sale_price_cents: number | null; active: boolean; available: number | null };
@@ -46,6 +47,7 @@ export default function Products() {
       <Card>
         <Loader state={state}>{(d) => <Table columns={columns} rows={d.products} rowKey={(r) => r.id} caption="Products" empty="No products yet. Add your first one to open the shop." />}</Loader>
       </Card>
+      <ProductImport onImported={() => void state.reload()} />
       <CatalogSetup />
       <Modal title="Add a product" open={Boolean(open)} onClose={() => setOpen(null)}>
         <div className="space-y-3">

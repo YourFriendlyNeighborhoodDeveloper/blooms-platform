@@ -84,6 +84,15 @@ const DEV_SECRET = 'local-development-secret-do-not-use-when-deployed';
 export class ConfigError extends Error {}
 
 /**
+ * Outside production, real providers may only reach these recipients. An entry starting with "@"
+ * allows a whole domain, which suits reserved test domains such as @demo.example.
+ */
+export function isAllowlisted(env: Pick<Env, 'messageAllowlist'>, recipient: string): boolean {
+  const to = recipient.trim().toLowerCase();
+  return env.messageAllowlist.some((entry) => (entry.startsWith('@') ? to.endsWith(entry) && to.length > entry.length : entry === to));
+}
+
+/**
  * Parses configuration and refuses to start on any combination that could move real money or
  * reach real people by accident. Optional integrations that are merely incomplete degrade to
  * "off" with a warning, so the site keeps working without them.

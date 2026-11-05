@@ -11,13 +11,16 @@ import { buildVariables } from './vars.js';
 
 const SAFE_URL = /(https?:\/\/[^\s<]+)/g;
 
-export function renderEmailHtml(bodyText: string, businessName: string): string {
+/** Shown on every message tied to test data, so nobody mistakes a demonstration for a real order. */
+export const TEST_MESSAGE_NOTE = 'TEST MESSAGE: sent by a demonstration or test system. No real order was placed and no money moved.';
+
+export function renderEmailHtml(bodyText: string, businessName: string, opts: { test?: boolean } = {}): string {
   const escaped = escapeHtml(bodyText)
     .replace(SAFE_URL, (u) => `<a href="${u}" style="color:#8e5664">${u}</a>`)
     .split(/\n{2,}/)
     .map((p) => `<p style="margin:0 0 16px">${p.replace(/\n/g, '<br>')}</p>`)
     .join('');
-  return `<!doctype html><html><body style="margin:0;background:#f6f0e9;padding:24px;font-family:Georgia,'Times New Roman',serif;color:#342f2c;font-size:16px;line-height:1.55"><div style="max-width:560px;margin:0 auto;background:#fffdf9;border-radius:16px;padding:32px"><p style="margin:0 0 24px;font-size:20px">${escapeHtml(businessName)}</p>${escaped}</div></body></html>`;
+  return `<!doctype html><html><body style="margin:0;background:#f6f0e9;padding:24px;font-family:Georgia,'Times New Roman',serif;color:#342f2c;font-size:16px;line-height:1.55"><div style="max-width:560px;margin:0 auto;background:#fffdf9;border-radius:16px;padding:32px"><p style="margin:0 0 24px;font-size:20px">${escapeHtml(businessName)}</p>${opts.test ? `<p style="margin:0 0 24px;padding:12px 14px;border-radius:10px;background:#f3e3b8;font-family:Arial,sans-serif;font-size:14px;color:#342f2c"><strong>Test message.</strong> Sent by a demonstration or test system. No real order was placed and no money moved.</p>` : ''}${escaped}</div></body></html>`;
 }
 
 /** Newest consent record wins, so opting out after opting in is always respected. */
@@ -169,9 +172,9 @@ export async function deliverNotification(ctx: AppContext, id: string, attempt: 
     if (n.channel === 'email') {
       const result = await ctx.email.send({
         to: n.recipient,
-        subject: n.subject ?? '',
-        text: n.body,
-        html: renderEmailHtml(n.body, settings.contact.business_name),
+        subject: n.is_test ? `[Test] ${n.subject ?? ''}` : (n.subject ?? ''),
+        text: n.is_test ? `${TEST_MESSAGE_NOTE}\n\n${n.body}` : n.body,
+        html: renderEmailHtml(n.body, settings.contact.business_name, { test: n.is_test }),
         reply_to: settings.contact.public_email,
         from_name: settings.notifications.from_name,
         idempotency_key: n.dedupe_key,
@@ -185,7 +188,7 @@ export async function deliverNotification(ctx: AppContext, id: string, attempt: 
       await ctx.db.updateTable('notifications').set({ status: 'suppressed', status_reason: 'Recipient opted out' }).where('id', '=', id).execute();
       return 'suppressed';
     }
-    const result = await ctx.sms.send({ to: n.recipient, body: n.body, status_callback: `${ctx.env.PUBLIC_BASE_URL}/api/webhooks/twilio/status` });
+    const result = await ctx.sms.send({ to: n.recipient, body: n.is_test ? `[Test] ${n.body}` : n.body, status_callback: `${ctx.env.PUBLIC_BASE_URL}/api/webhooks/twilio/status` });
     await log(result.provider, result.status, { provider_message_id: result.message_id, error_message: result.reason ?? null });
     await markResult(ctx, n, result.status, result.reason ?? null);
     return result.status;

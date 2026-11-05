@@ -62,12 +62,14 @@ Payments are simulated locally (`PAYMENTS_MODE=mock`), and email is recorded rat
 | `npm run admin:create -- <email> "<name>"` | Create an owner account |
 | `npm run verify:stripe` | Check a Stripe test-mode connection. Refuses live keys |
 | `npm run build:concept` and `npm run smoke` | The original static concept, with no backend, and its smoke test |
+| `scripts/staging.sh up`, `publish`, `verify`, `reset`, `backup`, `restore-check` | The staging demonstration: run it, publish it, check it from outside, and reset it. See [the demonstration guide](docs/client-handoff/demonstration-guide.md) |
 | `npm run images` / `npm run og` | Re-download the stock photography, and re-render the Open Graph cards |
 
 ## Documentation
 
 | | |
 | --- | --- |
+| [Client handoff](docs/client-handoff/README.md) | Plain-language guides for the owner, and the demonstration script |
 | [Implementation report](docs/implementation-report.md) | What is finished, tested, mocked, and still needed |
 | [Owner checklist](docs/owner-checklist.md) | Decisions and accounts only the business can provide |
 | [Administrator guide](docs/admin-guide.md) and [staff guide](docs/staff-guide.md) | Using the dashboard |

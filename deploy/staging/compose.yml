@@ -1,0 +1,116 @@
+# Staging demonstration: the real application, worker and database, reachable over HTTPS through a
+# Cloudflare quick tunnel. Run it with scripts/staging.sh, which writes .env.staging beside this file.
+#
+# Everything is fictional: simulated payments that refuse to run in production, email captured by
+# Mailpit and never delivered, text messages off. The site keeps its concept notices and noindex.
+name: blooms-staging
+
+x-app: &app
+  image: blooms-platform:staging
+  restart: unless-stopped
+  env_file: .env.staging
+  volumes:
+    - storage:/app/storage
+  depends_on:
+    db:
+      condition: service_healthy
+
+services:
+  web:
+    <<: *app
+    build:
+      context: ../..
+      args:
+        SITE_MODE: preview
+    environment:
+      SERVE_STATIC: 'true'
+      WORKER_EMBEDDED: 'false'
+    command: ['node', 'dist-server/index.js']
+
+  worker:
+    <<: *app
+    pull_policy: never
+    command: ['node', 'dist-server/worker.js']
+    healthcheck:
+      disable: true
+
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: blooms
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run scripts/staging.sh up}
+      POSTGRES_DB: blooms
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U blooms']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # Captures every message the application sends. It never relays anything to a real inbox.
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    environment:
+      MP_WEBROOT: mailbox
+      MP_UI_AUTH: ${MAILBOX_AUTH:?Run scripts/staging.sh up}
+      MP_MAX_MESSAGES: '2000'
+      MP_DATABASE: /data/mailpit.db
+    volumes:
+      - mailbox:/data
+
+  proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    # Local HTTPS for this machine only. Nothing listens on other network interfaces.
+    ports:
+      - '127.0.0.1:8443:443'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    depends_on:
+      - web
+      - mailpit
+
+  # Optional public HTTPS address on trycloudflare.com, started only by scripts/staging.sh publish.
+  # Publishing exposes this machine's staging stack to the internet, so it is a deliberate step.
+  # The address changes if this container restarts; run scripts/staging.sh resync to follow it.
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    profiles: ['public']
+    restart: unless-stopped
+    command: ['tunnel', '--no-autoupdate', '--url', 'http://proxy:80']
+    depends_on:
+      - proxy
+
+  # A dump at startup and then daily, kept in deploy/staging/backups. Staging needs no rotation.
+  backup:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD:?Run scripts/staging.sh up}
+    volumes:
+      - ./backups:/backups
+    entrypoint: ['/bin/sh', '-c']
+    command:
+      - |
+        while true; do
+          file=/backups/blooms-staging-$$(date -u +%Y%m%dT%H%M%SZ).dump
+          if pg_dump -h db -U blooms -d blooms --format=custom --no-owner --file="$$file.partial"; then
+            mv "$$file.partial" "$$file" && echo "backup written: $$file"
+          else
+            echo "BACKUP FAILED" >&2
+          fi
+          sleep 86400
+        done
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  storage:
+  mailbox:
+  caddy_data:

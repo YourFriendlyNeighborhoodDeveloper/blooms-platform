@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import { api } from '../../lib/api';
 import { useSession } from '../session';
 import { Badge, Btn, Card, Checkbox, Field, Input, Loader, PageHeader, Select, Textarea, useAction, useLoad } from '../ui';
@@ -330,7 +331,8 @@ function Closures() {
 
 export default function Settings() {
   const state = useLoad<Values>('/api/admin/settings');
-  const [tab, setTab] = useState('hours');
+  const [params] = useSearchParams();
+  const [tab, setTab] = useState(() => params.get('tab') ?? 'hours');
   const tabs = [{ key: 'hours', label: 'Hours & closures' }, ...GROUPS.map((g) => ({ key: g.key, label: g.label }))];
   return (
     <>

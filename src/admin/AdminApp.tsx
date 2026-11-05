@@ -37,6 +37,7 @@ const extra = {
   Templates: lazy(() => import('./pages/Templates')),
   System: lazy(() => import('./pages/System')),
   Setup: lazy(() => import('./pages/Setup')),
+  Onboarding: lazy(() => import('./pages/Onboarding')),
   Account: lazy(() => import('./pages/MyAccount')),
 };
 
@@ -70,6 +71,7 @@ const NAV: Array<{ heading: string; items: NavItem[] }> = [
     { to: '/admin/marketing', label: 'Marketing', permission: 'marketing.manage' },
     { to: '/admin/settings', label: 'Settings', permission: 'settings.manage' },
     { to: '/admin/templates', label: 'Messages & rules', permission: 'templates.manage' },
+    { to: '/admin/onboarding', label: 'Set up your shop', permission: 'settings.manage' },
     { to: '/admin/setup', label: 'Launch checklist', permission: 'settings.manage' },
     { to: '/admin/system', label: 'System', permission: 'system.manage' },
   ] },
@@ -270,6 +272,7 @@ function Shell() {
                 <Route path="settings" element={<extra.Settings />} />
                 <Route path="templates" element={<extra.Templates />} />
                 <Route path="setup" element={<extra.Setup />} />
+                <Route path="onboarding" element={<extra.Onboarding />} />
                 <Route path="system/*" element={<extra.System />} />
                 <Route path="me" element={<extra.Account />} />
                 <Route path="*" element={<Navigate to="/admin" replace />} />

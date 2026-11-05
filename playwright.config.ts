@@ -16,8 +16,8 @@ export default defineConfig({
   reporter: [['list'], ['html', { open: 'never' }]],
   use: { baseURL: `http://localhost:${PORT}`, actionTimeout: 15_000, trace: 'retain-on-failure', screenshot: 'only-on-failure' },
   projects: [
-    { name: 'desktop', use: { ...devices['Desktop Chrome'] }, testIgnore: /mobile\.spec/ },
-    { name: 'mobile', use: { ...devices['Pixel 7'] }, testMatch: /mobile\.spec/ },
+    { name: 'desktop', use: { ...devices['Desktop Chrome'] }, testIgnore: [/mobile\.spec/, /staging\//] },
+    { name: 'mobile', use: { ...devices['Pixel 7'] }, testMatch: /mobile\.spec/, testIgnore: /staging\// },
   ],
   webServer: {
     command: 'node scripts/e2e-server.mjs',

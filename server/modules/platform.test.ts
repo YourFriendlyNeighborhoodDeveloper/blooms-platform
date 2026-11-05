@@ -8,9 +8,10 @@ import { SYSTEM_ACTOR } from '../lib/audit.js';
 import { normalizeFacebookUrl } from './content/facebook.js';
 import { processImage, sniffType } from './uploads.js';
 import { readinessChecks } from './settings/readiness.js';
-import { loadEnv } from '../config/env.js';
+import { isAllowlisted, loadEnv } from '../config/env.js';
 import { queueCalendarPush } from './calendar/sync.js';
 import { checkIntegrity } from './system/integrity.js';
+import { parseCsv, templateCsv } from './catalog/import.js';
 import { changeStock } from './inventory/service.js';
 import sharp from 'sharp';
 
@@ -392,7 +393,8 @@ describe('Message templates', () => {
     const test = await staff.post(`/api/admin/templates/${email.id}/test`, {});
     expect(test.json.sent_to).toBe(owner.email);
     await drain(ctx);
-    expect(h.email.to(owner.email).some((m) => m.subject === 'Thanks!')).toBe(true);
+    // Payments are simulated here, so the message is labelled as a test.
+    expect(h.email.to(owner.email).some((m) => m.subject === '[Test] Thanks!')).toBe(true);
     expect(h.email.sent.filter((m) => m.to !== owner.email)).toHaveLength(0);
   });
 
@@ -952,5 +954,105 @@ describe('Launch checklist records', () => {
     const stale = await backups();
     expect(stale.status).toBe('todo');
     expect(stale.detail).toContain('more than 90 days');
+  });
+});
+
+describe('Message allowlist outside production', () => {
+  it('matches exact addresses and whole reserved domains, and nothing else', () => {
+    const env = loadEnv({ APP_ENV: 'test', DATABASE_URL: 'postgres://unused', MESSAGE_ALLOWLIST: 'Tester@Example.com, @demo.example, +19895550100' });
+    expect(isAllowlisted(env, 'tester@example.com')).toBe(true);
+    expect(isAllowlisted(env, 'riley@demo.example')).toBe(true);
+    expect(isAllowlisted(env, 'RILEY@DEMO.EXAMPLE')).toBe(true);
+    expect(isAllowlisted(env, '+19895550100')).toBe(true);
+    expect(isAllowlisted(env, '@demo.example')).toBe(false);
+    expect(isAllowlisted(env, 'someone@notdemo.example.com')).toBe(false);
+    expect(isAllowlisted(env, 'owner@realbusiness.com')).toBe(false);
+    expect(isAllowlisted(loadEnv({ APP_ENV: 'test', DATABASE_URL: 'postgres://unused' }), 'anyone@demo.example')).toBe(false);
+  });
+
+  it('labels every message tied to test data', async () => {
+    await configureShop(ctx);
+    const product = await makeProduct(ctx);
+    const b = h.browser();
+    await b.post('/api/public/cart/items', { variant_id: product.variant_id, quantity: 1, options: {} });
+    await b.post('/api/public/contact', { name: 'Label Example', email: 'label@example.test', topic: 'general', message: 'Do you deliver on Sundays?' });
+    await drain(ctx);
+    const mail = h.email.sent.find((m) => m.to === 'label@example.test');
+    expect(mail?.subject.startsWith('[Test] ')).toBe(true);
+    expect(mail?.text.startsWith('TEST MESSAGE')).toBe(true);
+    expect(mail?.html).toContain('Test message.');
+  });
+});
+
+describe('Record check for rentals', () => {
+  it('counts reservations that start together once each, and still catches real overbooking', async () => {
+    const arch = await ctx.db.insertInto('rental_items').values({ name: 'Check Arch', quantity: 2, cleaning_buffer_minutes: 60 }).returning('id').executeTakeFirstOrThrow();
+    const start = new Date('2027-01-16T16:00:00Z');
+    const end = new Date('2027-01-17T04:00:00Z');
+    for (let i = 0; i < 2; i++) {
+      await ctx.db.insertInto('rental_reservations').values({ rental_item_id: arch.id, quantity: 1, starts_at: start, ends_at: end, buffer_minutes: 60, blocked_until: new Date(end.getTime() + 3_600_000), status: 'confirmed' }).execute();
+    }
+    const rentalCheck = async () => (await checkIntegrity(ctx.db)).checks.find((c) => c.id === 'rentals_within_quantity');
+    expect((await rentalCheck())?.violations).toBe(0);
+
+    // Owning fewer than are booked is exactly what the check exists to catch.
+    await ctx.db.updateTable('rental_items').set({ quantity: 1 }).where('id', '=', arch.id).execute();
+    expect((await rentalCheck())?.violations).toBe(1);
+  });
+});
+
+describe('Spreadsheet import', () => {
+  const header = 'name,department,category,variant,sku,price,sale_price,cost,stock,low_stock_alert,prep_minutes,workload_points,min_notice_hours,pickup,delivery,shipping,tax_category,short_description,description,status';
+  const file = (...rows: string[]) => [header, ...rows].join('\r\n');
+
+  it('reads quoted fields, commas, line breaks and a byte-order mark', () => {
+    expect(parseCsv('\uFEFFa,b\r\n"one, two","say ""hi""\nagain"\r\n')).toEqual([['a', 'b'], ['one, two', 'say "hi"\nagain']]);
+    expect(parseCsv(templateCsv())[0][0]).toBe('name');
+  });
+
+  it('checks every row, reports problems by line, and writes nothing until the whole file is valid', async () => {
+    await configureShop(ctx);
+    const owner = await makeStaff(ctx, { roles: ['owner'], email: 'owner@example.test' });
+    const staff = await signIn(h, owner.email);
+    const bad = file(
+      'Spring Tulips,Floral,Bouquets,Standard,TUL-1,45,,,10,2,20,2,0,yes,yes,no,,Fresh tulips,,draft',
+      'Spring Tulips,Floral,Bouquets,Large,TUL-1,65,,,,,,,,yes,yes,no,,,,draft',
+      'Mystery Box,Groceries,,Standard,MB-1,ten,,,,,,,,maybe,,,,,,',
+    );
+    const checked = (await staff.post('/api/admin/catalog/import', { csv: bad, dry_run: false })).json;
+    expect(checked.ok).toBe(false);
+    const messages = checked.errors.map((e: { line: number; message: string }) => `${e.line}: ${e.message}`).join(' | ');
+    expect(messages).toContain('3: SKU TUL-1 is also on line 2');
+    expect(messages).toContain('4: Price must be an amount in dollars');
+    expect(messages).toContain('4: Pickup must be yes or no');
+    expect(await ctx.db.selectFrom('products').select('id').where('name', '=', 'Spring Tulips').execute()).toHaveLength(0);
+
+    const good = file(
+      'Spring Tulips,Floral,Spring Specials,Standard,TUL-1,45,,18,10,2,20,2,0,yes,yes,no,,Fresh tulips,,draft',
+      'Spring Tulips,Floral,Spring Specials,Large,TUL-2,65,55,26,4,2,30,3,0,yes,yes,no,,,,draft',
+      '"Linen Napkins, set of 4",Boutique,,Natural,NAP-1,$32.00,,,,,,,,yes,no,yes,,,,active',
+    );
+    const preview = (await staff.post('/api/admin/catalog/import', { csv: good, dry_run: true })).json;
+    expect(preview).toMatchObject({ ok: true, dry_run: true, products: 2, variants: 3, stocked: 2, categories_created: ['Spring Specials'] });
+    expect(await ctx.db.selectFrom('products').select('id').where('name', '=', 'Spring Tulips').execute()).toHaveLength(0);
+
+    const done = (await staff.post('/api/admin/catalog/import', { csv: good, dry_run: false })).json;
+    expect(done.ok).toBe(true);
+    const tulips = await ctx.db.selectFrom('products').selectAll().where('name', '=', 'Spring Tulips').executeTakeFirstOrThrow();
+    expect(tulips.status).toBe('draft');
+    const variants = await ctx.db.selectFrom('product_variants').select(['sku', 'price_cents', 'sale_price_cents']).where('product_id', '=', tulips.id).orderBy('sort_order').execute();
+    expect(variants).toEqual([{ sku: 'TUL-1', price_cents: 4500, sale_price_cents: null }, { sku: 'TUL-2', price_cents: 6500, sale_price_cents: 5500 }]);
+    const level = await ctx.db.selectFrom('inventory_items as i').innerJoin('inventory_levels as l', 'l.item_id', 'i.id').select('l.on_hand').where('i.sku', '=', 'INV-TUL-1').executeTakeFirstOrThrow();
+    expect(level.on_hand).toBe(10);
+    const napkins = await ctx.db.selectFrom('products').select(['status', 'allow_shipping']).where('name', '=', 'Linen Napkins, set of 4').executeTakeFirstOrThrow();
+    expect(napkins).toEqual({ status: 'active', allow_shipping: true });
+
+    // Importing the same file again is refused, rather than making duplicates.
+    const again = (await staff.post('/api/admin/catalog/import', { csv: good, dry_run: true })).json;
+    expect(again.ok).toBe(false);
+    expect(again.errors.map((e: { message: string }) => e.message).join(' ')).toContain('already exists');
+
+    const florist = await signIn(h, (await makeStaff(ctx, { roles: ['florist'], email: 'flo@example.test' })).email);
+    expect((await florist.post('/api/admin/catalog/import', { csv: good, dry_run: true })).status).toBe(403);
   });
 });

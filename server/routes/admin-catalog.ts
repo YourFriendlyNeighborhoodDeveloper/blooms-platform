@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { importProducts, templateCsv } from '../modules/catalog/import.js';
 import { bodyLimit } from 'hono/body-limit';
 import { z } from 'zod';
 import { sql } from 'kysely';
@@ -71,6 +72,23 @@ adminCatalogRoutes.get('/products', async (c) => {
     .execute();
   const stock = await sellableQuantities(ctx.db, rows.flatMap((r) => r.variants.map((v) => v.id)));
   return c.json({ products: rows.map((r) => ({ ...r, variants: r.variants.map((v) => ({ ...v, available: stock.get(v.id) ?? null })), warnings: warningsFor(r) })) });
+});
+
+/** A spreadsheet template for importing products, with three clearly fictional example rows. */
+adminCatalogRoutes.get('/import/template.csv', (c) => {
+  requirePermission(c, 'catalog.manage');
+  c.header('Content-Type', 'text/csv; charset=utf-8');
+  c.header('Content-Disposition', 'attachment; filename="product-import-template.csv"');
+  return c.body(templateCsv());
+});
+
+/** Checks, and then imports, a product spreadsheet. Nothing is written unless every row is valid. */
+adminCatalogRoutes.post('/import', async (c) => {
+  requirePermission(c, 'catalog.manage');
+  const body = await readJson(c, z.object({ csv: z.string().min(1).max(900_000), dry_run: z.boolean().default(true) }));
+  const result = await importProducts(c.get('ctx').db, body.csv, { dryRun: body.dry_run, actor: staffActor(c) });
+  // A file with problems is a normal answer, not a failed request: the list of problems is the result.
+  return c.json(result);
 });
 
 adminCatalogRoutes.get('/meta', async (c) => {

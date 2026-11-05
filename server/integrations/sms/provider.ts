@@ -1,5 +1,5 @@
 import twilio from 'twilio';
-import type { Env } from '../../config/env.js';
+import { isAllowlisted, type Env } from '../../config/env.js';
 import type { Logger } from '../../lib/logger.js';
 
 export type SmsResult = { provider: string; message_id: string | null; status: 'sent' | 'skipped'; reason?: string };
@@ -37,7 +37,7 @@ export function createSmsProvider(env: Env, log: Logger): SmsProvider {
     enabled: true,
     name: 'twilio',
     async send({ to, body, status_callback }) {
-      if (!env.isProduction && !env.messageAllowlist.includes(to)) {
+      if (!env.isProduction && !isAllowlisted(env, to)) {
         log.info('sms blocked by non-production allowlist');
         return { provider: 'twilio', message_id: null, status: 'skipped', reason: 'Recipient is not on MESSAGE_ALLOWLIST outside production' };
       }

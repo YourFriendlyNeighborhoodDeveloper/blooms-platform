@@ -331,6 +331,30 @@ test('owner setup: departments, stages, roles and crews can be changed without a
   await owner.context().close();
 });
 
+test('owner onboarding: the setup steps, and products loaded from a spreadsheet', async ({ browser }) => {
+  const owner = await signInStaff(browser, 'owner@demo.example');
+  await owner.goto('/admin/onboarding');
+  await expect(owner.getByRole('heading', { name: 'Set up your shop' })).toBeVisible();
+  await expect(owner.getByText('Products and photos')).toBeVisible();
+  await owner.getByRole('link', { name: 'Go there' }).nth(5).click();
+  await expect(owner).toHaveURL(/tab=ordering/);
+  await expect(owner.getByRole('heading', { name: 'Ordering' })).toBeVisible();
+
+  await owner.goto('/admin/products');
+  const csv = [
+    'name,department,category,variant,sku,price,stock,pickup,delivery,status',
+    'E2E Sunflower Bunch,Floral,Seasonal,Standard,E2E-SUN-1,38.00,6,yes,yes,draft',
+    'E2E Sunflower Bunch,Floral,Seasonal,Large,E2E-SUN-2,52.00,3,yes,yes,draft',
+  ].join('\n');
+  await owner.locator('input[type="file"][accept=".csv,text/csv"]').setInputFiles({ name: 'products.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
+  await owner.getByRole('button', { name: 'Check the file' }).click();
+  await expect(owner.getByText(/Ready to import: 1 product with 2 variants/)).toBeVisible();
+  await owner.getByRole('button', { name: 'Import', exact: true }).click();
+  await expect(owner.getByText(/Imported: 1 product with 2 variants/)).toBeVisible();
+  await expect(owner.getByRole('link', { name: 'E2E Sunflower Bunch' })).toBeVisible();
+  await owner.context().close();
+});
+
 test('hours the owner confirms replace the unverified listing on the public site', async ({ page }) => {
   await page.goto('/about');
   // The demo shop saved all seven days: Monday to Saturday 9 to 6, closed Sunday.

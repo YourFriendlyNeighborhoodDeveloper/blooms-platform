@@ -112,7 +112,8 @@ const DEFINITIONS: Definition[] = [
           AND b.status IN ('hold', 'approved', 'confirmed', 'out')
           AND b.starts_at <= a.starts_at AND a.starts_at < b.blocked_until
         WHERE a.rental_item_id = i.id AND a.status IN ('hold', 'approved', 'confirmed', 'out')
-        GROUP BY a.starts_at
+        -- One row per reservation: grouping by start time alone would count reservations that start together twice.
+        GROUP BY a.id, a.starts_at
         ORDER BY reserved DESC
         LIMIT 1
       ) peak ON peak.reserved > i.quantity

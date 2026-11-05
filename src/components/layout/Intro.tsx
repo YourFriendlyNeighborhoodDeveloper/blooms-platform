@@ -69,7 +69,7 @@ export function Intro() {
             </motion.p>
           </div>
           <motion.p
-            className="eyebrow mt-4 text-charcoal/60"
+            className="eyebrow mt-4 text-charcoal/70"
             initial={{ opacity: 0 }}
             animate={{ opacity: ready && !leaving ? 1 : 0 }}
             transition={{ duration: 0.8, delay: leaving ? 0 : 0.9 }}
@@ -85,7 +85,7 @@ export function Intro() {
           <button
             type="button"
             onClick={finishIntro}
-            className="absolute right-5 bottom-6 rounded-full px-4 py-2 text-xs tracking-widest text-charcoal/60 uppercase hover:text-charcoal"
+            className="absolute right-5 bottom-6 rounded-full px-4 py-2 text-xs tracking-widest text-charcoal/70 uppercase hover:text-charcoal"
           >
             Skip intro
           </button>

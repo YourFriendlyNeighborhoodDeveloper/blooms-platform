@@ -130,12 +130,12 @@ export function Hero() {
       </div>
 
       <motion.div style={{ opacity: fade }} className="pointer-events-none absolute bottom-3 left-1/2 z-[2] hidden -translate-x-1/2 flex-col items-center gap-2 lg:flex" aria-hidden="true">
-        <span className="eyebrow text-[0.6rem] text-charcoal/50">Scroll</span>
+        <span className="eyebrow text-[0.6rem] text-charcoal/70">Scroll</span>
         <span className="relative block h-10 w-px overflow-hidden bg-charcoal/15">
           <motion.span className="absolute inset-x-0 top-0 h-1/2 bg-charcoal/70" animate={{ y: ['-100%', '200%'] }} transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }} />
         </span>
       </motion.div>
-      <p className="absolute right-4 bottom-3 z-[2] hidden text-[0.65rem] tracking-wide text-charcoal/45 lg:block">Photography shown is illustrative</p>
+      <p className="absolute right-4 bottom-3 z-[2] hidden text-[0.65rem] tracking-wide text-charcoal/70 lg:block">Photography shown is illustrative</p>
     </section>
   );
 }

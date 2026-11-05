@@ -80,7 +80,7 @@ export function Chapters() {
                     0{active + 1}
                   </motion.span>
                 </AnimatePresence>
-                <span className="text-charcoal/45">/ 0{CHAPTERS.length}</span>
+                <span className="text-charcoal/70">/ 0{CHAPTERS.length}</span>
               </div>
               <span className="illustrative-tag absolute bottom-4 left-4 z-10 rounded-full bg-ivory/80 px-2.5 py-1 text-charcoal/75">Illustrative photo</span>
             </div>

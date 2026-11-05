@@ -1,84 +1,106 @@
-# Blooms Boutique & Floral — website concept
+# Blooms Boutique & Floral: website and business platform
 
-An independent, speculative website design for **Blooms Boutique & Floral** (7680 Gratiot Road, Suite 4, Saginaw, MI) by **Abraxas Technologies**.
+A website, online shop, wedding planner, and team dashboard for **Blooms Boutique & Floral**
+(7680 Gratiot Road, Suite 4, Saginaw, MI), by **Abraxas Technologies**.
 
-> **This is not the official Blooms website.** It has not been commissioned, it is not a live storefront, and preview builds are marked `noindex`. Photography is illustrative stock from Unsplash and does not show Blooms' own work. Forms validate input but never send anything.
+> **This is not the official Blooms website.** It began as an independent concept and has not been
+> launched. Every page says so, preview builds ask search engines not to list them, and payments run
+> in test mode. Photography is illustrative stock from Unsplash and does not show Blooms' own work.
+> Going live is a deliberate step that needs the owner's approval. See [docs/operations.md](docs/operations.md#going-live).
 
-## What's in it
+## What it does
 
-Six routes — Home, Flowers, Weddings & Events, Event Rentals, Boutique, About & Contact — plus a 404, built as a motion-first experience:
+**For customers.** The original motion-rich site, now backed by a real system: an online shop for
+flowers and boutique pieces, with options, pickup, delivery and shipping, and only offering times the
+shop can actually meet; secure payment on Stripe's hosted page; order tracking for every item; a
+seven-step wedding and event planner that works at any hour, with an honest estimate, a live date check
+and consultation booking; quotes, deposits and balances; and a passwordless customer account.
 
-- **WebGL silk shader** (raw WebGL, no 3D library) behind the hero and consultation sections, twisted by the cursor.
-- **Petal field**: a global canvas of petals that drift, parallax with scroll, scatter in the cursor's wind and burst from every click. Toggle in the footer; off under reduced motion.
-- **Variable-type wordmarks**: Fraunces' weight, SOFT and WONK axes respond per-letter to cursor distance (a slow wave on touch devices).
-- **The Atelier**: a generative SVG bouquet sketchpad (7 flower kinds, 4 palettes, 3 finishes) with spring physics you can brush through; "Send this idea" pre-fills the contact form.
-- Page-transition curtains, a first-visit intro, custom cursor with contextual labels, magnetic buttons, Lenis smooth scrolling, scroll-lit manifesto text, stacking service cards, a pinned horizontal gallery, a cinematic letterboxed hero with a running timecode, sticky chapter theatre, a scroll-drawn process vine, a "lamp" cursor that lights a dark room, a 3D boutique ring and a pile of tossable polaroids.
-- Event inquiry and general inquiry forms with full client-side validation, clearly labelled as demonstrations.
+**For the team.** A dashboard at `/admin` with today's work, orders, deliveries, a shared calendar,
+the wedding pipeline, inventory with recipes and purchasing, rentals, customers, reports, message
+templates, and every business rule. Roles limit what each person sees.
+
+**Behind the scenes.** A capacity engine that weighs staff hours, workload, crews, rentals, delivery
+windows and closures. The database enforces no overselling and no double booking. Background jobs
+send messages, remind, reconcile payments and recover after restarts.
+
+See [docs/implementation-report.md](docs/implementation-report.md) for exactly what is done, tested,
+and still needed.
 
 ## Stack
 
-React 19 · TypeScript · Vite 7 · Tailwind CSS 4 · Motion 12 · Lenis · React Router 7. Fonts are self-hosted (Fraunces, Instrument Sans — both SIL OFL). No backend, database, analytics, third-party embeds or secrets.
+React 19, TypeScript, Vite 7, Tailwind CSS 4, Motion 12 and React Router 7 for the site and dashboard.
+Node with Hono, PostgreSQL 17 with Kysely, and Zod on the server. Stripe, Resend or SMTP, Twilio
+(optional), and any S3-compatible storage as integrations. Vitest and Playwright for tests. Fonts are
+self-hosted (Fraunces and Instrument Sans, both SIL OFL).
+
+## Getting started
+
+Needs Node 22 or newer, and Docker for the local database.
+
+```sh
+npm install
+cp .env.example .env
+npm run db:up && npm run db:migrate
+npm run db:seed:demo      # fictional products, staff and rules; prints the staff password once
+npm run dev               # site at http://localhost:5173, team dashboard at /admin
+```
+
+Payments are simulated locally (`PAYMENTS_MODE=mock`), and email is recorded rather than sent.
 
 ## Scripts
 
 | Command | What it does |
 | --- | --- |
-| `npm run dev` | Local dev server |
-| `npm run build` | Type-check, build, then write per-route HTML shells, sitemap, robots and `_headers` (`scripts/postbuild.mjs`) |
-| `npm run preview` | Serve the build on port 4173 |
-| `npm run typecheck` / `npm run lint` | TypeScript and ESLint (incl. jsx-a11y) |
-| `npm run smoke` | Playwright smoke test of the build on desktop + mobile: console errors, failed requests, overflow, contact links, navigation, both forms. Needs Google Chrome installed. |
-| `npm run images` | Re-download and re-encode the photography listed in `scripts/image-manifest.json` |
-| `npm run og` | Re-render the Open Graph cards in `public/og/` |
+| `npm run dev` | Site, API and worker together, with reload |
+| `npm run build` | Type-check, build the site, write the per-route HTML shells, and bundle the server |
+| `npm start` / `npm run start:worker` | Run the built web server or worker |
+| `npm run check` | Typecheck, lint, all server tests, and the production build |
+| `npm test` | Server tests against a real PostgreSQL database |
+| `npm run test:e2e` | Browser tests against the production build |
+| `npm run db:migrate`, `db:seed:demo`, `db:reset`, `db:check`, `db:types` | Database tasks. `db:check` runs the record checks |
+| `npm run admin:create -- <email> "<name>"` | Create an owner account |
+| `npm run verify:stripe` | Check a Stripe test-mode connection. Refuses live keys |
+| `npm run build:concept` and `npm run smoke` | The original static concept, with no backend, and its smoke test |
+| `npm run images` / `npm run og` | Re-download the stock photography, and re-render the Open Graph cards |
 
-Build switches:
+## Documentation
 
-- `SITE_URL` — absolute origin for canonical and Open Graph URLs (default `https://abraxas-blooms-concept.pages.dev`).
-- `SITE_MODE=production` (or `npm run build:production`) — removes the preview `noindex` directives and opens `robots.txt`. Only use this for an owner-approved launch.
+| | |
+| --- | --- |
+| [Implementation report](docs/implementation-report.md) | What is finished, tested, mocked, and still needed |
+| [Owner checklist](docs/owner-checklist.md) | Decisions and accounts only the business can provide |
+| [Administrator guide](docs/admin-guide.md) and [staff guide](docs/staff-guide.md) | Using the dashboard |
+| [Business settings](docs/business-settings.md) | Every rule and its default |
+| [Operations](docs/operations.md) | Deploying, monitoring, backups, restores and rollback |
+| [Integrations](docs/integrations.md) | Stripe, email, Twilio, Facebook, Google Calendar and storage |
+| [Services and costs](docs/costs-and-services.md) | Every outside service and what it costs |
+| [Testing](docs/testing.md) | Test layers, and what is mocked versus verified |
+| [Database](docs/database.md), [architecture audit](docs/architecture-audit.md), [handoff](docs/handoff.md), [troubleshooting](docs/troubleshooting.md), [implementation checklist](docs/implementation-checklist.md) | For developers and whoever maintains it |
 
-## Where things live
+## Facts: confirmed versus to confirm with the owner
 
-```
-src/data/business.ts   Business facts — single source of truth for copy, links and JSON-LD
-src/data/seo.ts        Per-route titles, descriptions and OG images
-src/components/fx      Shader, petals, cursor, variable type, bloom mark
-src/components/atelier Bouquet sketchpad and its SVG flora
-src/components/forms   Form state/validation and both inquiry forms
-src/sections/…         Page sections, grouped by page
-scripts/               Image pipeline, OG renderer, postbuild, smoke test
-```
-
-## Facts: confirmed vs. to confirm with the owner
-
-Used as confirmed: business name, co-owner Samantha Todd, address, phone, public email (`bloomsbotiquefloral@gmail.com`, spelled as listed), and the Facebook / WeddingWire / The Knot profile links. The WeddingWire listing (checked Oct 2026) shows the same name, address and phone.
-
-Shown with an "unverified — please call to confirm" flag and kept out of structured data: **shop hours** (from the township listing).
-
-Open questions for the owner:
-
-- Hours, holiday schedule and whether Sunday/Monday are closed.
-- The Knot still lists the business as *Magical I Do's* at **6881 Gratiot Road** — likely worth updating.
-- Delivery areas, timing and fees for flowers; which rental items are current; showroom visits by appointment or walk-in.
-- Real portfolio photography and a portrait/bio for Samantha (placeholders are marked).
-- Boutique: no products, prices, brands or stock are shown anywhere, by design.
+Used as confirmed: the business name, co-owner Samantha Todd, the address, phone, public email
+(`bloomsbotiquefloral@gmail.com`, spelled as listed), and the Facebook, WeddingWire and The Knot
+profile links. Shop hours come from the township listing, and are shown as unverified until the owner
+saves real hours in the dashboard. Open questions are in [docs/owner-checklist.md](docs/owner-checklist.md).
 
 ## Replacing the imagery
 
-Stock images: add or swap entries in `scripts/image-manifest.json` (`key`, Unsplash `id`, `alt`) and run `npm run images`. It writes `public/img/<key>-<width>.webp` (640/1280/1920) plus blur placeholders and dimensions in `src/data/images.json`.
+Stock images are listed in `scripts/image-manifest.json` and fetched with `npm run images`, which
+writes `public/img/<key>-<width>.webp` and blur placeholders in `src/data/images.json`. For the
+owner's own photos, point `processOne` in `scripts/fetch-images.mjs` at local files and keep the same
+keys. Then remove the "Illustrative photo" tags and the imagery note in `src/data/business.ts`.
+Product photos are uploaded in the dashboard.
 
-Owner photos: `scripts/fetch-images.mjs` currently downloads from Unsplash only; point its `processOne` at local files (read with `fs.readFile` instead of `fetch`) and keep the same keys so components pick them up unchanged. Then remove the "Illustrative photo" tags and the imagery note in `src/data/business.ts`.
+## Accessibility and motion
 
-## Going live (after approval)
-
-1. Connect the forms: e.g. a Cloudflare Pages Function or form service that emails the shop, with spam protection (Turnstile). Replace the demo-complete states.
-2. Swap in owner photography and confirm the open questions above.
-3. Build with the real domain: `SITE_URL=https://example.com npm run build:production`.
-4. Remove the concept badge (`src/components/layout/ConceptBadge.tsx`) and concept copy in the footer.
-
-## Accessibility & motion
-
-Semantic landmarks, one `h1` per page, skip link, visible focus rings, keyboard-operable menu, lightbox, accordions and forms (errors linked with `aria-describedby`, focus moves to the first invalid field). `prefers-reduced-motion` disables the intro, smooth scrolling, petals and shader animation. The custom cursor only appears on fine pointers and never hides the text caret in fields.
+Semantic landmarks, one `h1` per page, a skip link, visible focus, keyboard-operable menus and forms,
+and errors linked to their fields. Small text meets WCAG AA contrast, and the forms, shop, planner and
+dashboard are checked automatically with axe in the browser tests. `prefers-reduced-motion` turns
+off the intro, smooth scrolling, petals and shader animation.
 
 ## Credits
 
-Design and development: Abraxas Technologies. Illustrative photography: [Unsplash](https://unsplash.com) contributors, under the Unsplash License.
+Design and development: Abraxas Technologies. Illustrative photography: [Unsplash](https://unsplash.com)
+contributors, under the Unsplash License.

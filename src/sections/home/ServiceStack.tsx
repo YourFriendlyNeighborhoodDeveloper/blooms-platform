@@ -52,9 +52,9 @@ const SERVICES: Service[] = [
 ];
 
 const TONES = {
-  blush: { card: 'bg-blush text-charcoal', muted: 'text-charcoal/70', line: 'border-charcoal/15', chip: 'bg-ivory/60', theme: undefined },
+  blush: { card: 'bg-blush text-charcoal', muted: 'text-charcoal/80', line: 'border-charcoal/15', chip: 'bg-ivory/60', theme: undefined },
   dark: { card: 'bg-charcoal text-ivory', muted: 'text-ivory/70', line: 'border-ivory/15', chip: 'bg-ivory/10', theme: 'dark' as const },
-  sage: { card: 'bg-sage text-ivory', muted: 'text-ivory/80', line: 'border-ivory/20', chip: 'bg-ivory/15', theme: 'dark' as const },
+  sage: { card: 'bg-sage text-ivory', muted: 'text-ivory', line: 'border-ivory/20', chip: 'border border-ivory/40', theme: 'dark' as const },
 };
 
 function StackCard({ s, i, total, progress }: { s: Service; i: number; total: number; progress: MotionValue<number> }) {

@@ -37,7 +37,7 @@ function Label({ htmlFor, label, required }: { htmlFor?: string; label: string; 
           *
         </span>
       ) : (
-        <span className="font-sans text-[0.68rem] tracking-normal text-charcoal/45 normal-case"> (optional)</span>
+        <span className="font-sans text-[0.68rem] tracking-normal text-charcoal/70 normal-case"> (optional)</span>
       )}
     </label>
   );
@@ -77,7 +77,7 @@ export function TextField({ label, error, hint, required, className, ...input }:
         <Underline invalid={!!error} />
       </div>
       {hint && (
-        <p id={hintId} className="pt-2 text-[0.78rem] text-charcoal/50">
+        <p id={hintId} className="pt-2 text-[0.78rem] text-charcoal/70">
           {hint}
         </p>
       )}
@@ -105,7 +105,7 @@ export function TextArea({ label, error, hint, required, className, ...input }: 
         <Underline invalid={!!error} />
       </div>
       {hint && (
-        <p id={hintId} className="pt-2 text-[0.78rem] text-charcoal/50">
+        <p id={hintId} className="pt-2 text-[0.78rem] text-charcoal/70">
           {hint}
         </p>
       )}
@@ -131,7 +131,7 @@ export function SelectField({ label, error, required, className, children, ...se
         >
           {children}
         </select>
-        <svg viewBox="0 0 24 24" width="16" height="16" className="pointer-events-none absolute top-1/2 right-1 -translate-y-1/2 text-charcoal/60" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="16" height="16" className="pointer-events-none absolute top-1/2 right-1 -translate-y-1/2 text-charcoal/70" aria-hidden="true">
           <path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
         <Underline invalid={!!error} />
@@ -162,7 +162,7 @@ export function ChipGroup({ label, name, options, value, multiple, onChange, onB
   const selected = Array.isArray(value) ? value : value ? [value] : [];
   return (
     <fieldset className={className} aria-describedby={error ? errId : undefined} onBlur={onBlur}>
-      <legend className="eyebrow text-charcoal/70">
+      <legend className="eyebrow text-charcoal/80">
         {label}
         {required && (
           <span className="text-rose-deep" aria-hidden="true">
@@ -170,7 +170,7 @@ export function ChipGroup({ label, name, options, value, multiple, onChange, onB
             *
           </span>
         )}
-        {hint && <span className="ml-2 font-sans text-[0.68rem] tracking-normal text-charcoal/45 normal-case">{hint}</span>}
+        {hint && <span className="ml-2 font-sans text-[0.68rem] tracking-normal text-charcoal/70 normal-case">{hint}</span>}
       </legend>
       <div className="mt-4 flex flex-wrap gap-2">
         {options.map((opt, i) => {

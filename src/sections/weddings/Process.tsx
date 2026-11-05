@@ -44,7 +44,7 @@ export function Process() {
             The consultation process
           </Eyebrow>
           <RevealText id="process-heading" text={'How it typically *unfolds.*'} className="mt-6 text-[clamp(2.4rem,5.4vw,5.2rem)] leading-[1] tracking-[-0.03em]" />
-          <p className="mt-6 text-charcoal/65">A typical flow — exact steps and timing are confirmed with you during your consultation.</p>
+          <p className="mt-6 text-charcoal/70">A typical flow — exact steps and timing are confirmed with you during your consultation.</p>
         </div>
         <div className="relative mt-20 lg:mt-28">
           <svg className="pointer-events-none absolute top-0 bottom-0 left-[28px] h-full w-16 -translate-x-1/2 lg:left-1/2" viewBox="0 0 100 1000" preserveAspectRatio="none" aria-hidden="true">

@@ -59,7 +59,9 @@ export const concept = {
 } as const;
 
 /** Returns open/closed state according to the published (unverified) hours. */
-export function publishedHoursStatus(now = new Date()) {
+export type HoursRow = { days: string; short: string; open: string; close: string; dayNums: readonly number[] };
+
+export function publishedHoursStatus(now = new Date(), schedule: readonly HoursRow[] = business.hours.schedule) {
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: 'America/Detroit',
     weekday: 'short',
@@ -71,7 +73,7 @@ export function publishedHoursStatus(now = new Date()) {
   const day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(get('weekday'));
   const minutes = Number(get('hour')) * 60 + Number(get('minute'));
   const toMin = (s: string) => Number(s.slice(0, 2)) * 60 + Number(s.slice(3));
-  const today = business.hours.schedule.find((s) => (s.dayNums as readonly number[]).includes(day));
+  const today = schedule.find((s) => s.dayNums.includes(day));
   if (today && minutes >= toMin(today.open) && minutes < toMin(today.close)) {
     return { open: true, closesAt: formatTime(today.close) };
   }

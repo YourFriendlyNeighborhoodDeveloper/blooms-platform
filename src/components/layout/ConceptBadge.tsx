@@ -1,11 +1,13 @@
 import { useId, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { concept } from '../../data/business';
+import { OWNER_APPROVED_LAUNCH, PLATFORM_ENABLED } from '../../lib/platform';
 
 /** Small, always-available disclosure that this is an independent concept. */
 export function ConceptBadge() {
   const [open, setOpen] = useState(false);
   const id = useId();
+  if (OWNER_APPROVED_LAUNCH) return null;
   return (
     <div className="concept-badge fixed bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-3 z-[80] transition-opacity duration-300 sm:left-5" data-no-burst>
       <AnimatePresence>
@@ -24,7 +26,7 @@ export function ConceptBadge() {
             <p className="eyebrow text-rose-deep">Design concept</p>
             <p className="mt-2">{concept.summary}</p>
             <p className="mt-2 text-charcoal/75">{concept.imagery}</p>
-            <p className="mt-2 text-charcoal/75">{concept.forms}</p>
+            {!PLATFORM_ENABLED && <p className="mt-2 text-charcoal/75">{concept.forms}</p>}
           </motion.div>
         )}
       </AnimatePresence>
@@ -41,7 +43,7 @@ export function ConceptBadge() {
         </span>
         <span className="sm:hidden">Concept · Abraxas</span>
         <span className="hidden sm:inline">Concept by {concept.studio}</span>
-        <span className="text-charcoal/40">{open ? '×' : 'ⓘ'}</span>
+        <span className="text-charcoal/70">{open ? '×' : 'ⓘ'}</span>
       </button>
     </div>
   );

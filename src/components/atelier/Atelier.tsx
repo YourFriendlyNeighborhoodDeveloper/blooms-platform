@@ -294,7 +294,7 @@ export function Atelier({ compact = false }: { compact?: boolean }) {
     <div className={cn('grid items-center gap-10 lg:grid-cols-12 lg:gap-14', compact && 'lg:gap-10')}>
       <div className="order-2 lg:order-1 lg:col-span-5">
         <fieldset>
-          <legend className="eyebrow text-charcoal/60">Add stems</legend>
+          <legend className="eyebrow text-charcoal/80">Add stems</legend>
           <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3">
             {KINDS.map((k) => (
               <button
@@ -315,7 +315,7 @@ export function Atelier({ compact = false }: { compact?: boolean }) {
         </fieldset>
 
         <fieldset className="mt-8">
-          <legend className="eyebrow text-charcoal/60">Palette</legend>
+          <legend className="eyebrow text-charcoal/80">Palette</legend>
           <div className="mt-4 flex flex-wrap gap-2">
             {PALETTES.map((p) => (
               <button
@@ -341,7 +341,7 @@ export function Atelier({ compact = false }: { compact?: boolean }) {
         </fieldset>
 
         <fieldset className="mt-8">
-          <legend className="eyebrow text-charcoal/60">Finish</legend>
+          <legend className="eyebrow text-charcoal/80">Finish</legend>
           <div className="mt-4 flex flex-wrap gap-2">
             {WRAPS.map((w) => (
               <button
@@ -365,7 +365,7 @@ export function Atelier({ compact = false }: { compact?: boolean }) {
           <Button onClick={surprise} variant="outline">
             Surprise me
           </Button>
-          <Button onClick={sendIdea} variant="solid" icon={<Arrow />} className={cn(!stems.length && 'pointer-events-none opacity-40')} ariaLabel="Send this bouquet idea to Blooms as a starting point">
+          <Button onClick={sendIdea} variant="solid" icon={<Arrow />} className={cn(!stems.length && 'pointer-events-none opacity-40')} ariaLabel="Send this idea, your bouquet, to the inquiry form">
             Send this idea
           </Button>
           {stems.length > 0 && (
@@ -374,7 +374,7 @@ export function Atelier({ compact = false }: { compact?: boolean }) {
             </button>
           )}
         </div>
-        <p className="mt-6 max-w-md text-[0.82rem] leading-relaxed text-charcoal/60">
+        <p className="mt-6 max-w-md text-[0.82rem] leading-relaxed text-charcoal/70">
           A mood board, not an order or a quote. Real designs follow the season and the florist&rsquo;s eye — this simply gives the conversation a head start.
         </p>
         <p className="sr-only" aria-live="polite">
@@ -386,9 +386,9 @@ export function Atelier({ compact = false }: { compact?: boolean }) {
         <div className="relative overflow-hidden rounded-[28px] border border-charcoal/10 bg-[radial-gradient(90%_70%_at_50%_35%,#fffaf6_0%,#f3e7df_60%,#ead9d0_100%)]">
           <div className="absolute top-5 left-5 z-10 flex items-baseline gap-2">
             <span className="font-display text-4xl tabular-nums">{String(stems.length).padStart(2, '0')}</span>
-            <span className="eyebrow text-charcoal/50">/ {MAX} stems</span>
+            <span className="eyebrow text-charcoal/80">/ {MAX} stems</span>
           </div>
-          <div className="absolute top-5 right-5 z-10 max-w-[55%] text-right text-[0.78rem] leading-snug text-charcoal/60" aria-hidden="true">
+          <div className="absolute top-5 right-5 z-10 max-w-[55%] text-right text-[0.78rem] leading-snug text-charcoal/70" aria-hidden="true">
             {summary || 'Tap a stem to begin'}
           </div>
           <svg

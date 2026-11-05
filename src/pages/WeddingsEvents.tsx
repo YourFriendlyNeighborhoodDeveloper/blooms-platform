@@ -7,6 +7,8 @@ import { InquirySection } from '../sections/shared/InquirySection';
 import { EventInquiryForm } from '../components/forms/EventInquiryForm';
 import { Eyebrow, ScrollText } from '../components/ui/Reveal';
 import { Img } from '../components/ui/Img';
+import { Link } from 'react-router';
+import { PLATFORM_ENABLED } from '../lib/platform';
 
 export default function WeddingsEvents() {
   return (
@@ -42,6 +44,16 @@ export default function WeddingsEvents() {
           <>
             Share the essentials and a little about the feeling you&rsquo;re after. The more you tell, the better the first conversation — inspiration
             photos, colors and must-haves are all welcome.
+            {PLATFORM_ENABLED && (
+              <>
+                {' '}
+                Prefer to build it out?{' '}
+                <Link to="/plan" className="link-underline text-rose-deep">
+                  Open the full planner
+                </Link>
+                .
+              </>
+            )}
           </>
         }
       >

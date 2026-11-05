@@ -1,0 +1,14 @@
+node_modules
+dist
+dist-server
+storage
+backups
+screenshots
+test-results
+playwright-report
+.git
+.env*
+!.env.example
+.claude
+CLAUDE.md
+.wrangler

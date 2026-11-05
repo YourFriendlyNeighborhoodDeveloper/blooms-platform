@@ -1,0 +1,5 @@
+# Automatic HTTPS. Set SITE_DOMAIN to the real domain, and point its DNS here first.
+{$SITE_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy web:8787
+}

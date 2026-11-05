@@ -3,8 +3,22 @@ dist
 .DS_Store
 *.local
 .env*
+!.env.example
 .claude/
 CLAUDE.md
 .wrangler
 test-results
 screenshots
+dist-server
+storage
+playwright-report
+backups
+
+# Never commit data or keys: database dumps, git bundles, private keys, staging access notes.
+*.dump
+*.dump.partial
+*.bundle
+*.pem
+*.key
+deploy/staging/access*
+deploy/staging/secrets*

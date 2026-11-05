@@ -5,14 +5,50 @@ import { business, links, concept } from '../../data/business';
 import { cn } from '../../lib/cn';
 import { useLenis } from './SmoothScroll';
 import { BloomMark } from '../fx/BloomMark';
+import { OWNER_APPROVED_LAUNCH, PLATFORM_ENABLED } from '../../lib/platform';
+import { useCart } from '../../shop/CartContext';
 
 export const NAV_LINKS = [
+  ...(PLATFORM_ENABLED ? [{ to: '/shop', label: 'Shop' }] : []),
   { to: '/flowers', label: 'Flowers' },
   { to: '/weddings-events', label: 'Weddings & Events' },
   { to: '/rentals', label: 'Rentals' },
   { to: '/boutique', label: 'Boutique' },
   { to: '/about', label: 'About & Contact' },
-] as const;
+];
+
+/** Useful, but not primary navigation. Listed in the footer and mobile menu. */
+export const EXTRA_LINKS = PLATFORM_ENABLED
+  ? [
+      { to: '/plan', label: 'Plan your event' },
+      { to: '/track', label: 'Order status' },
+      { to: '/account', label: 'Your account' },
+      { to: '/live', label: 'Live & video' },
+      { to: '/privacy', label: 'Privacy' },
+    ]
+  : [];
+
+function CartLink({ onDark }: { onDark: boolean }) {
+  const { cart } = useCart();
+  const count = cart.item_count;
+  return (
+    <Link
+      to="/cart"
+      aria-label={count ? `Cart, ${count} ${count === 1 ? 'item' : 'items'}` : 'Cart, empty'}
+      className={cn('relative grid h-11 w-11 place-items-center rounded-full border transition-colors duration-500', onDark ? 'border-ivory/30 hover:bg-ivory hover:text-charcoal' : 'border-charcoal/20 hover:bg-charcoal hover:text-ivory')}
+    >
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" aria-hidden="true">
+        <path d="M6 8h12l1 12H5L6 8Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+        <path d="M9 10V7a3 3 0 0 1 6 0v3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+      {count > 0 && (
+        <span aria-hidden="true" data-testid="cart-count" className="absolute -top-1 -right-1 grid h-5 min-w-5 place-items-center rounded-full bg-rose-deep px-1 text-[0.68rem] font-medium text-ivory">
+          {count}
+        </span>
+      )}
+    </Link>
+  );
+}
 
 function PhoneIcon({ className }: { className?: string }) {
   return (
@@ -120,8 +156,8 @@ export function Nav() {
             <span className="flex flex-col leading-none">
               <span className="font-display text-[1.45rem] tracking-[-0.02em]" style={{ fontVariationSettings: "'SOFT' 100, 'WONK' 1" }}>
                 Blooms
-              </span>
-              <span className="mt-1 text-[0.58rem] font-semibold tracking-[0.24em] uppercase opacity-70">Boutique &amp; Floral</span>
+              </span>{' '}
+              <span className="mt-1 text-[0.58rem] font-semibold tracking-[0.24em] uppercase opacity-80">Boutique &amp; Floral</span>
             </span>
           </Link>
 
@@ -149,6 +185,7 @@ export function Nav() {
           </nav>
 
           <div className="relative z-[2] flex items-center gap-2">
+            {PLATFORM_ENABLED && <CartLink onDark={onDark || open} />}
             <a
               href={links.tel}
               className={cn(
@@ -268,7 +305,7 @@ function MenuOverlay({ open, onClose, returnFocus }: { open: boolean; onClose: (
                 {business.email}
               </a>
             </div>
-            <p className="text-ivory/60">{concept.summary.split('.')[0]}.</p>
+            {!OWNER_APPROVED_LAUNCH && <p className="text-ivory/60">{concept.summary.split('.')[0]}.</p>}
           </motion.div>
         </motion.div>
       )}

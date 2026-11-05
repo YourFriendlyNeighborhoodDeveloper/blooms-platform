@@ -81,7 +81,7 @@ export function Trust() {
             </a>
           ))}
         </div>
-        <p className="mt-6 text-[0.78rem] text-charcoal/60">
+        <p className="mt-6 text-[0.78rem] text-charcoal/70">
           Themes summarised from public reviews on WeddingWire and The Knot (where the listing still uses the Magical I Do&rsquo;s name). No reviews are
           reproduced or edited here.
         </p>

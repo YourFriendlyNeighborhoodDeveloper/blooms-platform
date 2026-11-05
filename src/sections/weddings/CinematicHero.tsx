@@ -59,7 +59,7 @@ export function CinematicHero() {
       />
       <motion.div
         aria-hidden="true"
-        className="absolute inset-x-0 bottom-0 z-[3] flex items-start justify-end gap-8 bg-ink px-[var(--gutter)] pt-3 text-[0.62rem] tracking-[0.2em] text-ivory/45 uppercase"
+        className="absolute inset-x-0 bottom-0 z-[3] flex items-start justify-end gap-8 bg-ink px-[var(--gutter)] pt-3 text-[0.62rem] tracking-[0.2em] text-ivory/50 uppercase"
         initial={{ height: '50.5%' }}
         animate={{ height: introDone ? '7svh' : '50.5%' }}
         transition={{ duration: 1.7, ease: BARS, delay: 0.15 }}

@@ -1,21 +1,24 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
-import { business, formatTime, links, publishedHoursStatus } from '../../data/business';
+import { business, formatTime, links, publishedHoursStatus, type HoursRow } from '../../data/business';
+import { useShopHours } from '../../lib/platform';
 import { Eyebrow, FadeIn, RevealText } from '../../components/ui/Reveal';
 import { Arrow, Button } from '../../components/ui/Button';
 import { cn } from '../../lib/cn';
 
-function useHoursStatus() {
-  const [status, setStatus] = useState(() => publishedHoursStatus());
+function useHoursStatus(schedule: readonly HoursRow[]) {
+  const [status, setStatus] = useState(() => publishedHoursStatus(new Date(), schedule));
   useEffect(() => {
-    const id = window.setInterval(() => setStatus(publishedHoursStatus()), 60_000);
+    setStatus(publishedHoursStatus(new Date(), schedule));
+    const id = window.setInterval(() => setStatus(publishedHoursStatus(new Date(), schedule)), 60_000);
     return () => window.clearInterval(id);
-  }, []);
+  }, [schedule]);
   return status;
 }
 
 export function HoursCard({ tone = 'light', className }: { tone?: 'light' | 'dark'; className?: string }) {
-  const status = useHoursStatus();
+  const hours = useShopHours();
+  const status = useHoursStatus(hours.schedule);
   return (
     <div className={cn('rounded-[22px] border p-6', tone === 'dark' ? 'border-ivory/15' : 'border-charcoal/12 bg-ivory/50', className)}>
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -27,11 +30,11 @@ export function HoursCard({ tone = 'light', className }: { tone?: 'light' | 'dar
           )}
         >
           <span className={cn('h-1.5 w-1.5 rounded-full', status.open ? 'bg-sage' : 'bg-rose')} aria-hidden="true" />
-          {status.open ? `Per listed hours: open until ${status.closesAt}` : 'Per listed hours: closed now'}
+          {hours.confirmed ? (status.open ? `Open until ${status.closesAt}` : 'Closed now') : status.open ? `Per listed hours: open until ${status.closesAt}` : 'Per listed hours: closed now'}
         </span>
       </div>
       <dl className="mt-5 space-y-2.5">
-        {business.hours.schedule.map((s) => (
+        {hours.schedule.map((s) => (
           <div key={s.days} className="flex justify-between gap-4 border-b border-current/10 pb-2.5">
             <dt>{s.days}</dt>
             <dd className="tabular-nums">
@@ -39,17 +42,19 @@ export function HoursCard({ tone = 'light', className }: { tone?: 'light' | 'dar
             </dd>
           </div>
         ))}
-        <div className="flex justify-between gap-4 opacity-70">
-          <dt>Sunday &amp; Monday</dt>
-          <dd>Not listed</dd>
-        </div>
+        {hours.closedDays && (
+          <div className="flex justify-between gap-4 opacity-70">
+            <dt>{hours.closedDays}</dt>
+            <dd>{hours.closedLabel}</dd>
+          </div>
+        )}
       </dl>
-      <p className={cn('mt-4 flex gap-2 text-[0.8rem] leading-snug', tone === 'dark' ? 'text-gold' : 'text-rose-deep')}>
+      {!hours.confirmed && <p className={cn('mt-4 flex gap-2 text-[0.8rem] leading-snug', tone === 'dark' ? 'text-gold' : 'text-rose-deep')}>
         <span aria-hidden="true">⚑</span>
         <span>
           Unverified: taken from the {business.hours.source.toLowerCase()}. Please call {business.phone.display} to confirm before visiting.
         </span>
-      </p>
+      </p>}
     </div>
   );
 }
@@ -120,7 +125,7 @@ export function Visit({ index = '08', heading = 'Come say *hello.*' }: { index?:
           <RevealText id="visit-heading" text={heading} className="mt-6 text-[clamp(2.6rem,6vw,5.6rem)] leading-[0.98] tracking-[-0.03em]" />
           <FadeIn className="mt-10 space-y-6">
             <address className="not-italic">
-              <p className="eyebrow text-charcoal/50">Address</p>
+              <p className="eyebrow text-charcoal/80">Address</p>
               <p className="mt-2 font-display text-[1.6rem] leading-snug">
                 {business.address.street}
                 <br />
@@ -129,13 +134,13 @@ export function Visit({ index = '08', heading = 'Come say *hello.*' }: { index?:
             </address>
             <div className="grid gap-6 sm:grid-cols-2">
               <div>
-                <p className="eyebrow text-charcoal/50">Phone</p>
+                <p className="eyebrow text-charcoal/80">Phone</p>
                 <a href={links.tel} className="link-underline mt-2 inline-block font-display text-[1.6rem]">
                   {business.phone.display}
                 </a>
               </div>
               <div>
-                <p className="eyebrow text-charcoal/50">Email</p>
+                <p className="eyebrow text-charcoal/80">Email</p>
                 <a href={links.mailto} className="link-underline mt-2 inline-block text-[1.02rem] break-all">
                   {business.email}
                 </a>

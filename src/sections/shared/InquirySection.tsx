@@ -33,7 +33,7 @@ export function InquirySection({
             <div className="mt-6 max-w-md text-[1.02rem] leading-relaxed text-charcoal/75">{intro}</div>
             <dl className="mt-10 space-y-5 border-t border-charcoal/15 pt-8">
               <div>
-                <dt className="eyebrow text-charcoal/55">Prefer to talk?</dt>
+                <dt className="eyebrow text-charcoal/80">Prefer to talk?</dt>
                 <dd className="mt-1">
                   <a href={links.tel} className="link-underline font-display text-[1.7rem]">
                     {business.phone.display}
@@ -41,7 +41,7 @@ export function InquirySection({
                 </dd>
               </div>
               <div>
-                <dt className="eyebrow text-charcoal/55">Email</dt>
+                <dt className="eyebrow text-charcoal/80">Email</dt>
                 <dd className="mt-1">
                   <a href={links.mailto} className="link-underline break-all">
                     {business.email}
@@ -49,7 +49,7 @@ export function InquirySection({
                 </dd>
               </div>
               <div>
-                <dt className="eyebrow text-charcoal/55">Visit</dt>
+                <dt className="eyebrow text-charcoal/80">Visit</dt>
                 <dd className="mt-1">
                   <a href={links.googleDirections} target="_blank" rel="noopener noreferrer" className="link-underline">
                     {business.address.street}, {business.address.city}

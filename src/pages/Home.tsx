@@ -9,11 +9,13 @@ import { Visit } from '../sections/shared/Visit';
 import { WordBand } from '../sections/shared/WordBand';
 import { Atelier } from '../components/atelier/Atelier';
 import { Eyebrow, RevealText } from '../components/ui/Reveal';
+import { HomePromos, FeaturedVideo } from '../sections/home/Promos';
 
 export default function Home() {
   return (
     <>
       <Hero />
+      <HomePromos />
       <Manifesto />
       <ServiceStack />
       <WordBand words={['Flowers', 'Weddings', 'Events', 'Boutique', 'Gifts', 'Home']} />
@@ -37,6 +39,7 @@ export default function Home() {
       </section>
       <BoutiqueList />
       <Trust />
+      <FeaturedVideo />
       <Consult />
       <Visit />
     </>

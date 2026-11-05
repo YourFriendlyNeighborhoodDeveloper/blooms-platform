@@ -12,6 +12,8 @@ import { Cursor } from './components/fx/Cursor';
 import { PetalField } from './components/fx/PetalField';
 import { notFoundMeta, pages, type PageMeta } from './data/seo';
 import Home from './pages/Home';
+import { PLATFORM_ENABLED, PlatformProvider } from './lib/platform';
+import { CartProvider } from './shop/CartContext';
 
 const loaders = {
   '/flowers': () => import('./pages/Flowers'),
@@ -25,6 +27,33 @@ const lazyPages = Object.fromEntries(Object.entries(loaders).map(([path, load]) 
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 const metaFor = (path: string) => pages.find((p) => p.path === path) as PageMeta;
+
+const AdminApp = lazy(() => import('./admin/AdminApp'));
+
+const privateMeta = (path: string, label: string): PageMeta => ({ path, label, title: `${label} — Blooms Boutique & Floral`, description: 'Blooms Boutique & Floral', ogImage: '/og/home.jpg' });
+
+/** Store, account and planner routes. They exist only in the platform build, never in the static concept preview. */
+const platformRoutes: Array<{ path: string; meta: PageMeta; Page: LazyExoticComponent<ComponentType> }> = PLATFORM_ENABLED
+  ? [
+      { path: '/shop', meta: metaFor('/shop'), Page: lazy(() => import('./pages/shop/Shop')) },
+      { path: '/shop/:slug', meta: privateMeta('/shop', 'Shop'), Page: lazy(() => import('./pages/shop/ProductPage')) },
+      { path: '/cart', meta: privateMeta('/cart', 'Your cart'), Page: lazy(() => import('./pages/shop/CartPage')) },
+      { path: '/checkout', meta: privateMeta('/checkout', 'Checkout'), Page: lazy(() => import('./pages/shop/Checkout')) },
+      { path: '/track', meta: privateMeta('/track', 'Order status'), Page: lazy(() => import('./pages/shop/Track').then((m) => ({ default: m.TrackLookup }))) },
+      { path: '/track/:token', meta: privateMeta('/track', 'Order status'), Page: lazy(() => import('./pages/shop/Track')) },
+      { path: '/plan', meta: metaFor('/plan'), Page: lazy(() => import('./pages/planner/Planner')) },
+      { path: '/plan/:token', meta: privateMeta('/plan', 'Your plan'), Page: lazy(() => import('./pages/planner/InquiryPortal')) },
+      { path: '/quote/:token', meta: privateMeta('/quote', 'Your quote'), Page: lazy(() => import('./pages/planner/QuotePage')) },
+      { path: '/pay/:token', meta: privateMeta('/pay', 'Payment'), Page: lazy(() => import('./pages/planner/PayInvoice')) },
+      { path: '/project/:token', meta: privateMeta('/project', 'Your event'), Page: lazy(() => import('./pages/planner/ProjectPortal')) },
+      { path: '/account', meta: privateMeta('/account', 'Your account'), Page: lazy(() => import('./pages/account/Account')) },
+      { path: '/account/verify/:token', meta: privateMeta('/account', 'Signing in'), Page: lazy(() => import('./pages/account/Verify')) },
+      { path: '/preferences/:token', meta: privateMeta('/preferences', 'Your preferences'), Page: lazy(() => import('./pages/account/Preferences')) },
+      { path: '/live', meta: metaFor('/live'), Page: lazy(() => import('./pages/Live')) },
+      { path: '/privacy', meta: privateMeta('/privacy', 'Privacy'), Page: lazy(() => import('./pages/Policy').then((m) => ({ default: m.PrivacyPage }))) },
+      { path: '/terms', meta: privateMeta('/terms', 'Terms'), Page: lazy(() => import('./pages/Policy').then((m) => ({ default: m.TermsPage }))) },
+    ]
+  : [];
 
 function PageFallback() {
   return <div className="min-h-[100svh]" />;
@@ -60,6 +89,19 @@ function AnimatedRoutes() {
             />
           );
         })}
+        {platformRoutes.map(({ path, meta, Page }) => (
+          <Route
+            key={path}
+            path={path}
+            element={
+              <PageShell meta={meta}>
+                <Suspense fallback={<PageFallback />}>
+                  <Page />
+                </Suspense>
+              </PageShell>
+            }
+          />
+        ))}
         <Route path="/contact" element={<Navigate to="/about#contact" replace />} />
         <Route
           path="*"
@@ -150,11 +192,24 @@ function Chrome() {
 }
 
 export default function App() {
+  const { pathname } = useLocation();
+  if (PLATFORM_ENABLED && pathname.startsWith('/admin')) {
+    // The dashboard is a work tool: same fonts and palette, none of the marketing site's motion.
+    return (
+      <Suspense fallback={<PageFallback />}>
+        <AdminApp />
+      </Suspense>
+    );
+  }
   return (
-    <ExperienceProvider>
-      <SmoothScroll>
-        <Chrome />
-      </SmoothScroll>
-    </ExperienceProvider>
+    <PlatformProvider>
+      <CartProvider>
+        <ExperienceProvider>
+          <SmoothScroll>
+            <Chrome />
+          </SmoothScroll>
+        </ExperienceProvider>
+      </CartProvider>
+    </PlatformProvider>
   );
 }

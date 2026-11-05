@@ -32,7 +32,7 @@ function ReelItem({ item, i, progress, skew }: { item: Item; i: number; progress
         <span>
           <span className="font-display italic text-charcoal">{String(i + 1).padStart(2, '0')}</span> — {item.caption}
         </span>
-        <span className="illustrative-tag text-charcoal/45">Illustrative</span>
+        <span className="illustrative-tag text-charcoal/70">Illustrative</span>
       </figcaption>
     </motion.figure>
   );

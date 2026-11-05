@@ -6,13 +6,15 @@
 //   SITE_MODE  "production" to allow indexing; anything else builds a noindex preview
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { pages, notFoundMeta, SITE_NAME } from '../src/data/seo.ts';
+import { pages as allPages, notFoundMeta, SITE_NAME } from '../src/data/seo.ts';
 import { business, fullAddress } from '../src/data/business.ts';
 
 const root = path.resolve(import.meta.dirname, '..');
 const dist = path.join(root, 'dist');
 const SITE_URL = (process.env.SITE_URL || 'https://abraxas-blooms-concept.pages.dev').replace(/\/$/, '');
 const production = process.env.SITE_MODE === 'production';
+const platform = process.env.VITE_PLATFORM !== 'off';
+const pages = allPages.filter((p) => platform || !p.platform);
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 

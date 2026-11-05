@@ -68,7 +68,7 @@ function TossTable() {
               <p className="absolute inset-x-0 bottom-2 text-center font-display text-[1.05rem] text-charcoal/80 italic sm:bottom-3 sm:text-[1.2rem]">{p.caption}</p>
             </motion.div>
           ))}
-          <span className="illustrative-tag absolute right-4 bottom-4 text-charcoal/50">Illustrative photos</span>
+          <span className="illustrative-tag absolute right-4 bottom-4 text-charcoal/70">Illustrative photos</span>
         </div>
       </div>
     </section>

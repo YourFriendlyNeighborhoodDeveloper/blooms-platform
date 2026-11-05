@@ -2,7 +2,8 @@ import { useRef } from 'react';
 import { Link } from 'react-router';
 import { motion, useScroll, useTransform } from 'motion/react';
 import { business, concept, formatTime, links } from '../../data/business';
-import { NAV_LINKS } from './Nav';
+import { EXTRA_LINKS, NAV_LINKS } from './Nav';
+import { OWNER_APPROVED_LAUNCH, useShopHours } from '../../lib/platform';
 import { useExperience } from './Experience';
 import { useLenis } from './SmoothScroll';
 import { Arrow, Button } from '../ui/Button';
@@ -11,6 +12,7 @@ import { BloomMark } from '../fx/BloomMark';
 export function Footer() {
   const ref = useRef<HTMLElement>(null);
   const { petals, setPetals, reduceMotion } = useExperience();
+  const hours = useShopHours();
   const lenis = useLenis();
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end end'] });
   const y = useTransform(scrollYProgress, [0, 1], ['-28%', '0%']);
@@ -40,7 +42,7 @@ export function Footer() {
             <div>
               <h3 className="eyebrow font-sans text-ivory/50">Explore</h3>
               <ul className="mt-5 space-y-2.5">
-                {[{ to: '/', label: 'Home' }, ...NAV_LINKS].map((l) => (
+                {[{ to: '/', label: 'Home' }, ...NAV_LINKS, ...EXTRA_LINKS].map((l) => (
                   <li key={l.to}>
                     <Link to={l.to} className="link-underline text-ivory/85 hover:text-ivory">
                       {l.label}
@@ -65,12 +67,12 @@ export function Footer() {
                 </a>
               </address>
               <div className="mt-6 text-sm text-ivory/70">
-                {business.hours.schedule.map((s) => (
+                {hours.schedule.map((s) => (
                   <p key={s.days}>
                     {s.short} · {formatTime(s.open)}–{formatTime(s.close)}
                   </p>
                 ))}
-                <p className="mt-2 text-xs text-gold/90">Hours from the township listing — please call to confirm.</p>
+                {!hours.confirmed && <p className="mt-2 text-xs text-gold/90">Hours from the township listing — please call to confirm.</p>}
               </div>
             </div>
             <div>
@@ -82,7 +84,7 @@ export function Footer() {
                       <span className="link-underline">{p.label}</span>
                       <Arrow direction="up-right" className="h-3.5 w-3.5 opacity-60 transition group-hover:opacity-100" />
                     </a>
-                    <span className="block text-xs text-ivory/45">{p.note}</span>
+                    <span className="block text-xs text-ivory/50">{p.note}</span>
                   </li>
                 ))}
               </ul>
@@ -101,7 +103,8 @@ export function Footer() {
 
         <div className="shell flex flex-col gap-5 border-t border-ivory/10 py-7 text-xs text-ivory/55 md:flex-row md:items-center md:justify-between">
           <p className="max-w-3xl leading-relaxed">
-            {concept.summary} {concept.imagery}
+            {!OWNER_APPROVED_LAUNCH && `${concept.summary} `}
+            {concept.imagery}
           </p>
           <div className="flex shrink-0 items-center gap-3">
             {!reduceMotion && (

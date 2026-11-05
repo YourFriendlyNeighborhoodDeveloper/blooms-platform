@@ -7,6 +7,8 @@ import { Arrow, Button } from '../ui/Button';
 import { BloomMark } from '../fx/BloomMark';
 import { business, links } from '../../data/business';
 import { cn } from '../../lib/cn';
+import { api, ApiError } from '../../lib/api';
+import { PLATFORM_ENABLED } from '../../lib/platform';
 
 const TOPICS = [
   { id: 'flowers', label: 'Flowers & arrangements' },
@@ -51,10 +53,31 @@ export function GeneralInquiryForm({ defaultTopic = '', className }: { defaultTo
   const form = useForm<V>(initial, rules);
   const { values, errors, set, blur } = form;
   const [sent, setSent] = useState<V | null>(null);
+  const [reference, setReference] = useState<string | null>(null);
+  const [sendError, setSendError] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
+  const [website, setWebsite] = useState('');
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (form.validateAll().ok) setSent({ ...values, phone: values.phone ? formatPhone(values.phone) : '' });
+    if (!form.validateAll().ok) return;
+    if (!PLATFORM_ENABLED) {
+      setSent({ ...values, phone: values.phone ? formatPhone(values.phone) : '' });
+      return;
+    }
+    setSending(true);
+    setSendError(null);
+    try {
+      const topic = TOPICS.find((t) => t.id === values.topic)?.label ?? values.topic;
+      const res = await api<{ reference: string }>('/api/public/contact', { body: { name: values.name, email: values.email, phone: values.phone || null, topic, message: values.message, website } });
+      setReference(res.reference);
+      setSent({ ...values, phone: values.phone ? formatPhone(values.phone) : '' });
+      form.reset();
+    } catch (err) {
+      setSendError(err instanceof ApiError ? err.message : 'We could not send that. Please try again.');
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -71,12 +94,24 @@ export function GeneralInquiryForm({ defaultTopic = '', className }: { defaultTo
             className="rounded-[28px] border border-charcoal/10 bg-ivory p-7 sm:p-10"
           >
             <BloomMark size={52} />
-            <p className="eyebrow mt-5 text-rose-deep">Concept demo complete</p>
-            <h3 className="mt-2 text-[clamp(1.7rem,3vw,2.3rem)] leading-tight">Looks good — though nothing was sent.</h3>
-            <p className="mt-4 text-charcoal/75">
-              Your note ({TOPICS.find((t) => t.id === sent.topic)?.label.toLowerCase()}) passed every check. On a live site it would go to the shop; on
-              this concept it stays with you. Reach Blooms directly:
-            </p>
+            {PLATFORM_ENABLED ? (
+              <>
+                <p className="eyebrow mt-5 text-rose-deep">Message received</p>
+                <h3 className="mt-2 text-[clamp(1.7rem,3vw,2.3rem)] leading-tight">Thank you. Your note is with the shop.</h3>
+                <p className="mt-4 text-charcoal/75">
+                  Someone will reply during business hours, and a confirmation is on its way to your inbox.{reference && ` Your reference is ${reference}.`} If it can&rsquo;t wait:
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="eyebrow mt-5 text-rose-deep">Concept demo complete</p>
+                <h3 className="mt-2 text-[clamp(1.7rem,3vw,2.3rem)] leading-tight">Looks good — though nothing was sent.</h3>
+                <p className="mt-4 text-charcoal/75">
+                  Your note ({TOPICS.find((t) => t.id === sent.topic)?.label.toLowerCase()}) passed every check. On a live site it would go to the shop; on
+                  this concept it stays with you. Reach Blooms directly:
+                </p>
+              </>
+            )}
             <div className="mt-7 flex flex-wrap gap-3">
               <Button href={links.tel} variant="solid">
                 Call {business.phone.display}
@@ -85,7 +120,7 @@ export function GeneralInquiryForm({ defaultTopic = '', className }: { defaultTo
                 Email the shop
               </Button>
               <button type="button" onClick={() => setSent(null)} className="link-underline px-2 text-sm text-charcoal/70">
-                Edit my note
+                {PLATFORM_ENABLED ? 'Send another note' : 'Edit my note'}
               </button>
             </div>
           </motion.div>
@@ -105,7 +140,15 @@ export function GeneralInquiryForm({ defaultTopic = '', className }: { defaultTo
             <h3 id="general-form-title" className="mt-2 text-[clamp(1.7rem,3vw,2.3rem)] leading-tight">
               Send the shop a note
             </h3>
-            <DemoNotice className="mt-6" />
+            {!PLATFORM_ENABLED && <DemoNotice className="mt-6" />}
+            {PLATFORM_ENABLED && (
+              <div aria-hidden="true" className="absolute -left-[9999px] h-px w-px overflow-hidden">
+                <label>
+                  Leave this field empty
+                  <input tabIndex={-1} autoComplete="off" name="website" value={website} onChange={(e) => setWebsite(e.target.value)} />
+                </label>
+              </div>
+            )}
             <div className="mt-8 grid gap-x-8 gap-y-8 sm:grid-cols-2">
               <TextField label="Your name" name="name" required autoComplete="name" value={values.name} onChange={(e) => set('name', e.target.value)} onBlur={() => blur('name')} error={errors.name} />
               <TextField
@@ -156,10 +199,15 @@ export function GeneralInquiryForm({ defaultTopic = '', className }: { defaultTo
                 error={errors.message}
               />
             </div>
+            {sendError && (
+              <p role="alert" className="mt-6 rounded-2xl border border-rose-deep/40 bg-blush/50 p-4 text-[0.92rem]">
+                {sendError} You can also call <a className="underline" href={links.tel}>{business.phone.display}</a>.
+              </p>
+            )}
             <div className="mt-9 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-[0.85rem] text-charcoal/60">Fields marked * are required.</p>
+              <p className="text-[0.85rem] text-charcoal/70">Fields marked * are required.</p>
               <Button type="submit" variant="solid" size="lg" icon={<Arrow />}>
-                Check my note
+                {PLATFORM_ENABLED ? (sending ? 'Sending…' : 'Send my note') : 'Check my note'}
               </Button>
             </div>
           </motion.form>

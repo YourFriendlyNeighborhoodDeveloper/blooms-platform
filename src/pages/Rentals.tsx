@@ -173,7 +173,7 @@ function Catalog() {
             })}
           </ul>
         )}
-        <p className="mt-6 text-[0.8rem] text-charcoal/60">
+        <p className="mt-6 text-[0.8rem] text-charcoal/70">
           Categories reflect rental offerings documented in the business&rsquo;s public listings. Current inventory, availability and pricing are confirmed
           directly with Blooms — nothing here is a live catalog.
         </p>

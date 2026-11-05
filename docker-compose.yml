@@ -1,0 +1,23 @@
+# Local development database. The explicit project name and non-default port keep this
+# independent of any other PostgreSQL running on the machine.
+name: blooms
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: blooms
+      POSTGRES_PASSWORD: blooms_dev_only
+      POSTGRES_DB: blooms_dev
+    ports:
+      - '127.0.0.1:54329:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U blooms']
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  pgdata:

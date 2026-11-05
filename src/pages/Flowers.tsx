@@ -12,6 +12,7 @@ import { scrollToTarget, useLenis } from '../components/layout/SmoothScroll';
 import { business, links } from '../data/business';
 import type { ImageKey } from '../lib/images';
 import { cn } from '../lib/cn';
+import { PLATFORM_ENABLED, usePlatform } from '../lib/platform';
 
 const OCCASIONS: Array<{ word: string; image: ImageKey }> = [
   { word: 'birthdays', image: 'tulips-vase' },
@@ -119,7 +120,7 @@ function BouquetRail() {
               <span>
                 <span className="font-display text-charcoal italic">{String(i + 1).padStart(2, '0')}</span> — {b.caption}
               </span>
-              <span className="illustrative-tag text-charcoal/45">Illustrative</span>
+              <span className="illustrative-tag text-charcoal/70">Illustrative</span>
             </figcaption>
           </motion.figure>
         ))}
@@ -184,6 +185,8 @@ function Occasions() {
 
 function HowToOrder() {
   const lenis = useLenis();
+  const { config } = usePlatform();
+  const online = PLATFORM_ENABLED && Boolean(config?.shop.has_products);
   const ways = [
     { title: 'Call the shop', body: 'The quickest way to talk through an order.', action: business.phone.display, href: links.tel },
     { title: 'Send an email', body: 'Share the occasion, colors and any photos you love.', action: 'Email Blooms', href: links.mailto },
@@ -200,11 +203,14 @@ function HowToOrder() {
             </Eyebrow>
             <RevealText id="order-heading" text={'Ordering flowers,\n*made easy.*'} className="mt-6 text-[clamp(2.4rem,5vw,4.8rem)] leading-[1] tracking-[-0.03em]" />
             <FadeIn className="mt-6 max-w-md text-[1.02rem] leading-relaxed text-charcoal/75">
-              There&rsquo;s no checkout here on purpose: every order starts with a real person. Reach out the way that suits you and Blooms will help you
-              choose.
+              {online
+                ? 'Order online any time, or reach out the way that suits you and Blooms will help you choose.'
+                : PLATFORM_ENABLED
+                  ? 'Reach out the way that suits you and Blooms will help you choose.'
+                  : 'There’s no checkout here on purpose: every order starts with a real person. Reach out the way that suits you and Blooms will help you choose.'}
             </FadeIn>
             <div className="mt-8 rounded-[22px] border border-charcoal/12 p-6">
-              <p className="eyebrow text-charcoal/60">Good to have ready</p>
+              <p className="eyebrow text-charcoal/80">Good to have ready</p>
               <ul className="mt-4 space-y-2.5">
                 {ready.map((r) => (
                   <li key={r} className="flex gap-3 text-[0.95rem]">
@@ -219,6 +225,13 @@ function HowToOrder() {
             </div>
           </div>
           <ol className="grid gap-3 lg:col-span-6 lg:col-start-7">
+            {online && (
+              <li>
+                <Button to="/shop?division=floral" size="lg" icon={<Arrow />}>
+                  Shop flowers online
+                </Button>
+              </li>
+            )}
             {ways.map((w, i) => (
               <li key={w.title}>
                 <a
@@ -245,7 +258,7 @@ function HowToOrder() {
                 className="w-full rounded-[24px] bg-blush p-7 text-left transition hover:bg-blush-deep"
               >
                 <span className="block text-[1.4rem] font-display">…or send a note below</span>
-                <span className="mt-1 block text-[0.9rem] text-charcoal/70">A short form (demo on this concept).</span>
+                <span className="mt-1 block text-[0.9rem] text-charcoal/70">{PLATFORM_ENABLED ? 'A short form. The shop replies by phone or email.' : 'A short form (demo on this concept).'}</span>
               </button>
             </li>
           </ol>
@@ -302,7 +315,7 @@ export default function Flowers() {
               <ParallaxImage name="pitcher-blooms" className="aspect-square" sizes="25vw" amount={8} tag={false} />
               <ParallaxImage name="rose-white" className="aspect-square" sizes="25vw" amount={8} tag={false} />
             </div>
-            <p className="mt-3 text-[0.72rem] text-charcoal/50">All photography illustrative.</p>
+            <p className="mt-3 text-[0.72rem] text-charcoal/70">All photography illustrative.</p>
           </div>
         </div>
       </section>

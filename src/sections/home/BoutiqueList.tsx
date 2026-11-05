@@ -6,6 +6,7 @@ import { Eyebrow, RevealText } from '../../components/ui/Reveal';
 import { Arrow } from '../../components/ui/Button';
 import type { ImageKey } from '../../lib/images';
 import { useFinePointer } from '../../hooks/useMediaQuery';
+import { PLATFORM_ENABLED, usePlatform } from '../../lib/platform';
 
 const ROWS: Array<{ title: string; note: string; image: ImageKey; anchor: string }> = [
   { title: 'Clothing', note: 'Easy, wearable pieces', image: 'knits', anchor: 'clothing' },
@@ -17,6 +18,7 @@ const ROWS: Array<{ title: string; note: string; image: ImageKey; anchor: string
 /** Typographic index; hovering a row conjures an image that trails the cursor. */
 export function BoutiqueList() {
   const fine = useFinePointer();
+  const { config } = usePlatform();
   const [active, setActive] = useState<number | null>(null);
   const area = useRef<HTMLDivElement>(null);
   const mx = useMotionValue(0);
@@ -81,12 +83,12 @@ export function BoutiqueList() {
                   onBlur={() => setActive(null)}
                   className="group relative grid grid-cols-[auto_1fr_auto] items-center gap-4 py-6 sm:gap-8 sm:py-9"
                 >
-                  <span className="font-display text-sm text-charcoal/50 italic">0{i + 1}</span>
+                  <span className="font-display text-sm text-charcoal/70 italic">0{i + 1}</span>
                   <span className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-8">
                     <span className="font-display text-[clamp(2.2rem,6.4vw,6rem)] leading-[0.95] tracking-[-0.035em] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-4 group-hover:text-rose-deep group-hover:italic">
                       {row.title}
                     </span>
-                    <span className="text-[0.9rem] text-charcoal/60 transition-opacity duration-500 sm:opacity-0 sm:group-hover:opacity-100">{row.note}</span>
+                    <span className="text-[0.9rem] text-charcoal/70 transition-opacity duration-500 sm:opacity-0 sm:group-hover:opacity-100">{row.note}</span>
                   </span>
                   <span className="flex items-center gap-4">
                     <span className="h-16 w-14 overflow-hidden rounded-xl md:hidden">
@@ -100,7 +102,17 @@ export function BoutiqueList() {
               </li>
             ))}
           </ul>
-          <p className="mt-5 text-[0.75rem] text-charcoal/50">Display catalog only — no online sales. Photography is illustrative.</p>
+          <p className="mt-5 text-[0.75rem] text-charcoal/70">
+            {PLATFORM_ENABLED && config?.shop.has_products ? (
+              <>
+                A selection is <Link to="/shop?division=boutique" className="underline">available online</Link>. Photography is illustrative.
+              </>
+            ) : PLATFORM_ENABLED ? (
+              'Photography is illustrative.'
+            ) : (
+              'Display catalog only — no online sales. Photography is illustrative.'
+            )}
+          </p>
         </div>
       </div>
     </section>

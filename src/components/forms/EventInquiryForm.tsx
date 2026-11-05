@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { useSearchParams } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 import { AnimatePresence, motion, useSpring } from 'motion/react';
 import { ChipGroup, DemoNotice, SelectField, TextArea, TextField } from './fields';
 import { formatPhone, isEmail, phoneDigits, todayISO, useForm, type Rules } from './useForm';
 import { BloomMark } from '../fx/BloomMark';
 import { Arrow, Button } from '../ui/Button';
 import { business, links } from '../../data/business';
+import { api, ApiError, newIdempotencyKey } from '../../lib/api';
+import { PLATFORM_ENABLED } from '../../lib/platform';
+import { useRef } from 'react';
 
 export const EVENT_SERVICES = [
   'Bridal & wedding party flowers',
@@ -121,16 +124,51 @@ export function EventInquiryForm() {
   const form = useForm<V>(initial, rules);
   const { values, errors, set, blur } = form;
   const [demoResult, setDemoResult] = useState<V | null>(null);
+  const [saved, setSaved] = useState<{ reference: string; portal_token: string | null } | null>(null);
+  const [sendError, setSendError] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
+  const [website, setWebsite] = useState('');
+  const idempotency = useRef(newIdempotencyKey());
   const progress = useSpring(0, { stiffness: 80, damping: 18 });
 
   useEffect(() => {
     progress.set(form.validCount / form.total);
   }, [form.validCount, form.total, progress]);
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const { ok } = form.validateAll();
-    if (ok) setDemoResult({ ...values, phone: formatPhone(values.phone) });
+    if (!ok) return;
+    if (!PLATFORM_ENABLED) {
+      setDemoResult({ ...values, phone: formatPhone(values.phone) });
+      return;
+    }
+    // A real, saved inquiry. It reserves nothing: the team confirms any date.
+    setSending(true);
+    setSendError(null);
+    try {
+      const res = await api<{ reference: string; portal_token: string | null }>('/api/public/planner/submit', {
+        body: {
+          idempotency_key: idempotency.current,
+          contact: { name: values.name, email: values.email, phone: values.phone },
+          event_type: values.eventType || 'Another celebration',
+          event_date: values.eventDate,
+          venue_name: values.venue,
+          guest_count: Number(values.guests),
+          budget_range: values.budget,
+          style: { preferences: values.description, optional_services: values.services.join(', ') },
+          selections: [],
+          website,
+        },
+      });
+      setSaved({ reference: res.reference, portal_token: res.portal_token });
+      setDemoResult({ ...values, phone: formatPhone(values.phone) });
+    } catch (err) {
+      setSendError(err instanceof ApiError ? err.message : 'We could not send that. Please try again.');
+      idempotency.current = newIdempotencyKey();
+    } finally {
+      setSending(false);
+    }
   };
 
   const errorCount = Object.values(errors).filter(Boolean).length;
@@ -152,14 +190,20 @@ export function EventInquiryForm() {
             <div className="flex items-center gap-4">
               <BloomMark size={56} />
               <div>
-                <p className="eyebrow text-rose-deep">Concept demo complete</p>
-                <h3 className="mt-1 text-[clamp(1.8rem,3.4vw,2.6rem)] leading-tight">Everything checks out — but nothing was sent.</h3>
+                <p className="eyebrow text-rose-deep">{saved ? `Inquiry ${saved.reference}` : 'Concept demo complete'}</p>
+                <h3 className="mt-1 text-[clamp(1.8rem,3.4vw,2.6rem)] leading-tight">{saved ? 'Thank you. Your inquiry is with the team.' : 'Everything checks out — but nothing was sent.'}</h3>
               </div>
             </div>
-            <p className="mt-5 max-w-2xl text-charcoal/75">
-              In a finished site, this inquiry would be delivered to the shop&rsquo;s inbox. This is a design concept, so your details stayed in your
-              browser. To reach Blooms about your event today, call or email directly.
-            </p>
+            {saved ? (
+              <p className="mt-5 max-w-2xl text-charcoal/75">
+                A confirmation is on its way to your inbox. Your date is not reserved yet: the team reviews it and gets back to you. You can book a consultation now if you like.
+              </p>
+            ) : (
+              <p className="mt-5 max-w-2xl text-charcoal/75">
+                In a finished site, this inquiry would be delivered to the shop&rsquo;s inbox. This is a design concept, so your details stayed in your
+                browser. To reach Blooms about your event today, call or email directly.
+              </p>
+            )}
             <dl className="mt-8 grid gap-x-8 gap-y-4 border-t border-charcoal/10 pt-6 text-[0.92rem] sm:grid-cols-2">
               {(
                 [
@@ -175,25 +219,35 @@ export function EventInquiryForm() {
                 ] as const
               ).map(([k, v]) => (
                 <div key={k} className={k === 'Services' ? 'sm:col-span-2' : undefined}>
-                  <dt className="eyebrow text-charcoal/50">{k}</dt>
+                  <dt className="eyebrow text-charcoal/80">{k}</dt>
                   <dd className="mt-1 break-words">{v}</dd>
                 </div>
               ))}
               <div className="sm:col-span-2">
-                <dt className="eyebrow text-charcoal/50">Description</dt>
+                <dt className="eyebrow text-charcoal/80">Description</dt>
                 <dd className="mt-1 whitespace-pre-line">{demoResult.description}</dd>
               </div>
             </dl>
             <div className="mt-9 flex flex-wrap gap-3">
-              <Button href={links.tel} variant="solid">
-                Call {business.phone.display}
-              </Button>
-              <Button href={links.mailto} variant="outline">
-                Email the shop
-              </Button>
-              <button type="button" onClick={() => setDemoResult(null)} className="link-underline px-2 text-sm text-charcoal/70 hover:text-charcoal">
-                Edit my answers
-              </button>
+              {saved?.portal_token ? (
+                <Button to={`/plan/${saved.portal_token}`} variant="solid" icon={<Arrow />}>
+                  Book a consultation
+                </Button>
+              ) : (
+                <Button href={links.tel} variant="solid">
+                  Call {business.phone.display}
+                </Button>
+              )}
+              {!saved && (
+                <Button href={links.mailto} variant="outline">
+                  Email the shop
+                </Button>
+              )}
+              {!saved && (
+                <button type="button" onClick={() => setDemoResult(null)} className="link-underline px-2 text-sm text-charcoal/70 hover:text-charcoal">
+                  Edit my answers
+                </button>
+              )}
             </div>
           </motion.div>
         ) : (
@@ -218,12 +272,25 @@ export function EventInquiryForm() {
               </div>
               <div className="flex shrink-0 flex-col items-center" aria-hidden="true">
                 <BloomMark size={64} progress={progress} />
-                <span className="mt-1 text-[0.7rem] text-charcoal/50 tabular-nums">
+                <span className="mt-1 text-[0.7rem] text-charcoal/70 tabular-nums">
                   {form.validCount}/{form.total}
                 </span>
               </div>
             </div>
-            <DemoNotice className="mt-6" />
+            {!PLATFORM_ENABLED && <DemoNotice className="mt-6" />}
+            {PLATFORM_ENABLED && (
+              <>
+                <p className="mt-5 text-[0.92rem] text-charcoal/70">
+                  Want to choose flowers, share photos and see a first estimate? <Link to="/plan" className="link-underline text-rose-deep">Use the full planner</Link>.
+                </p>
+                <div aria-hidden="true" className="absolute -left-[9999px] h-px w-px overflow-hidden">
+                  <label>
+                    Leave this field empty
+                    <input tabIndex={-1} autoComplete="off" name="website" value={website} onChange={(e) => setWebsite(e.target.value)} />
+                  </label>
+                </div>
+              </>
+            )}
 
             <div className="mt-9 grid gap-x-8 gap-y-8 sm:grid-cols-2">
               <TextField label="Your name" name="name" required autoComplete="name" value={values.name} onChange={(e) => set('name', e.target.value)} onBlur={() => blur('name')} error={errors.name} />
@@ -334,14 +401,19 @@ export function EventInquiryForm() {
               />
             </div>
 
+            {sendError && (
+              <p role="alert" className="mt-8 rounded-2xl border border-rose-deep/40 bg-blush/50 p-4 text-[0.92rem]">
+                {sendError} You can also call <a className="underline" href={links.tel}>{business.phone.display}</a>.
+              </p>
+            )}
             <div className="mt-10 flex flex-col gap-4 border-t border-charcoal/10 pt-8 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-[0.85rem] text-charcoal/60" aria-live="polite">
+              <p className="text-[0.85rem] text-charcoal/70" aria-live="polite">
                 {form.submitCount > 0 && errorCount > 0
                   ? `${errorCount} field${errorCount > 1 ? 's need' : ' needs'} attention.`
                   : 'Fields marked * are required.'}
               </p>
               <Button type="submit" variant="solid" size="lg" icon={<Arrow />}>
-                Check my inquiry
+                {PLATFORM_ENABLED ? (sending ? 'Sending…' : 'Send my inquiry') : 'Check my inquiry'}
               </Button>
             </div>
           </motion.form>

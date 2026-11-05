@@ -7,6 +7,8 @@ export type PageMeta = {
   description: string;
   ogImage: string;
   label: string;
+  /** Exists only when the platform backend is part of the build. */
+  platform?: boolean;
 };
 
 export const SITE_NAME = 'Blooms Boutique & Floral';
@@ -59,6 +61,30 @@ export const pages: PageMeta[] = [
     description:
       'Visit Blooms at 7680 Gratiot Road, Suite 4, Saginaw. Call (989) 600-8752 or send a note about flowers, weddings, rentals or the boutique.',
     ogImage: '/og/about.jpg',
+  },
+  {
+    path: '/shop',
+    label: 'Shop',
+    title: 'Shop Flowers & Boutique Gifts Online — Blooms Boutique & Floral',
+    description: 'Order flowers and boutique pieces online for pickup or local delivery from Blooms Boutique & Floral in Saginaw, Michigan.',
+    ogImage: '/og/flowers.jpg',
+    platform: true,
+  },
+  {
+    path: '/plan',
+    label: 'Plan your event',
+    title: 'Plan Your Wedding or Event Online — Blooms Boutique & Floral',
+    description: 'Start planning your wedding flowers and event décor any time. Share your date, style and wish list, see an estimate, and book a consultation with Blooms.',
+    ogImage: '/og/weddings-events.jpg',
+    platform: true,
+  },
+  {
+    path: '/live',
+    label: 'Live & video',
+    title: 'Videos and Live Shows — Blooms Boutique & Floral',
+    description: 'Watch videos and live shows from Blooms Boutique & Floral, and shop what you see.',
+    ogImage: '/og/home.jpg',
+    platform: true,
   },
 ];
 

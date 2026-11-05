@@ -10,6 +10,7 @@ import { business, links } from '../data/business';
 import { useIsDesktop } from '../hooks/useMediaQuery';
 import type { ImageKey } from '../lib/images';
 import { cn } from '../lib/cn';
+import { PLATFORM_ENABLED, usePlatform } from '../lib/platform';
 
 const RING: Array<{ name: ImageKey; label: string }> = [
   { name: 'knits', label: 'Clothing' },
@@ -65,7 +66,7 @@ function Ring() {
           </div>
         ))}
       </motion.div>
-      <p className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[0.72rem] text-charcoal/50">Drag to spin · illustrative photography</p>
+      <p className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[0.72rem] text-charcoal/70">Drag to spin · illustrative photography</p>
     </div>
   );
 }
@@ -106,6 +107,8 @@ const SECTIONS: Array<{ id: string; title: string; dek: string; body: string; a:
 ];
 
 export default function Boutique() {
+  const { config } = usePlatform();
+  const online = PLATFORM_ENABLED && Boolean(config?.shop.has_products);
   return (
     <>
       <PageHero
@@ -115,8 +118,8 @@ export default function Boutique() {
         eyebrow="Clothing · Gifts · Home décor · Seasonal"
         aside={
           <FadeIn afterIntro delay={0.45} className="text-[1.05rem] leading-relaxed text-charcoal/75">
-            Alongside the flowers, the shop on Gratiot Road carries clothing, gifts, home décor and seasonal pieces. This page is a showcase — there&rsquo;s
-            no online store, so the best way to shop is in person.
+            Alongside the flowers, the shop on Gratiot Road carries clothing, gifts, home décor and seasonal pieces.{' '}
+            {online ? 'Shop a selection online, or come and see it all in person.' : PLATFORM_ENABLED ? 'The best way to shop is in person.' : 'This page is a showcase — there’s no online store, so the best way to shop is in person.'}
           </FadeIn>
         }
       >
@@ -164,14 +167,20 @@ export default function Boutique() {
         <div className="shell mt-28">
           <div className="flex flex-col items-start justify-between gap-6 rounded-[28px] bg-charcoal p-8 text-ivory sm:p-12 lg:flex-row lg:items-center" data-theme="dark">
             <div>
-              <p className="eyebrow text-gold">Display catalog</p>
+              <p className="eyebrow text-gold">{online ? 'Online and in store' : 'Display catalog'}</p>
               <p className="mt-3 max-w-2xl font-display text-[clamp(1.6rem,3vw,2.4rem)] leading-tight">
-                No online checkout, prices or stock lists — just a reason to visit. Products shown are illustrative.
+                {online ? 'A selection is online, and the rest is waiting on the rail. Photos here are illustrative.' : 'No online checkout, prices or stock lists — just a reason to visit. Products shown are illustrative.'}
               </p>
             </div>
-            <Button href={links.googleDirections} external variant="light" size="lg" icon={<Arrow direction="up-right" />}>
-              Get directions
-            </Button>
+            {online ? (
+              <Button to="/shop?division=boutique" variant="light" size="lg" icon={<Arrow />}>
+                Shop the boutique
+              </Button>
+            ) : (
+              <Button href={links.googleDirections} external variant="light" size="lg" icon={<Arrow direction="up-right" />}>
+                Get directions
+              </Button>
+            )}
           </div>
         </div>
       </section>

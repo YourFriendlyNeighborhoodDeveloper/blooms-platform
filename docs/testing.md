@@ -37,7 +37,9 @@ checks run on every push.
 on a phone-sized screen and as the owner. It covers the full order journey with the tracking page
 following each staff step, pending, failed and abandoned payments, duplicate confirmations, a partial
 refund, a wedding plan through to a confirmed project, the fully booked date, the shop's protective
-rules, role limits, and that no secret reaches the browser. It never resets data. It adds fictional
+rules, role limits, and that no secret reaches the browser. It also checks Flora's launcher and panel
+on the deployed site in WebKit at iPhone size, Chrome at Android size and desktop Chrome, and that her
+status matches the server's. Set `STAGING_SCREENSHOTS` to a folder to keep screenshots of each. It never resets data. It adds fictional
 test orders, which `scripts/staging.sh reset` removes. Credentials are passed in for the run only.
 
 ## What is covered
@@ -54,6 +56,7 @@ test orders, which `scripts/staging.sh reset` removes. Credentials are passed in
 | Browser | `e2e/platform.spec.ts` | Product discovery, cart, promotions, private tracking, passwordless sign-in, refunds, role restrictions, calendar, settings, Facebook failing safely, the order desk, owner setup, confirmed hours, and the original pages |
 | Browser | `e2e/a11y.spec.ts` | Automated WCAG 2.1 AA checks (axe) on checkout, every planner step, the shop, account, tracking, the inquiry forms and the dashboard; keyboard-only sign-in |
 | Browser | `e2e/mobile.spec.ts` | No sideways scrolling on 14 pages at phone width; buying, planning, and staff work on a phone |
+| Browser | `e2e/flora-mobile.spec.ts` | Flora on a phone, in Chromium (Pixel 7) and WebKit, Safari's engine (iPhone 13). Covered: the launcher is on screen without scrolling on four pages, uncovered and clear of the concept badge; the panel fills the screen and keeps the text box above a simulated keyboard; 16px type; `/?chat=open`; the offline state with its status and alternatives |
 | Browser | `e2e/flora.spec.ts` | Flora's widget (with an accessibility check), a plan saved from chat, the review page prefilled and edited, sent to the sandbox, the dashboard's sandbox and transcript views, and the continue-a-call page |
 | Browser | `e2e/zz-integrity.spec.ts` | After every browser flow, all record checks still pass |
 

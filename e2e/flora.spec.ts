@@ -10,7 +10,7 @@ import { newCustomer, query, signInStaff } from './support/helpers.js';
 test('a chat saves a plan, the visitor reviews and sends it, and it lands in the sandbox, not the pipeline', async ({ browser }) => {
   const page = await newCustomer(browser);
   await page.goto('/');
-  await page.getByRole('button', { name: 'Ask Flora' }).click();
+  await page.getByTestId('flora-launcher').click();
   const panel = page.getByRole('dialog', { name: /Chat with Flora, an automated assistant/ });
   await expect(panel).toBeVisible();
   await expect(panel.getByText('Automated assistant · demonstration')).toBeVisible();
@@ -64,6 +64,27 @@ test('a chat saves a plan, the visitor reviews and sends it, and it lands in the
   await expect(staff.locator('summary', { hasText: 'send_planning_link' })).toBeVisible();
   await staff.goto('/admin/flora');
   await expect(staff.getByText(/Estimated spend/)).toBeVisible();
+});
+
+test('on a wide screen the launcher stays clear of the home page buttons', async ({ browser }) => {
+  for (const viewport of [{ width: 1280, height: 720 }, { width: 1440, height: 900 }, { width: 1920, height: 1080 }]) {
+    const page = await (await browser.newContext({ viewport })).newPage();
+    await page.goto('/');
+    const launcher = page.getByTestId('flora-launcher');
+    await expect(launcher).toBeVisible({ timeout: 20_000 });
+    const lb = (await launcher.boundingBox())!;
+    expect(lb.y + lb.height).toBeLessThanOrEqual(viewport.height);
+    for (const name of ['Explore Flowers', 'Plan Your Event']) {
+      const b = (await page.getByRole('main').getByRole('link', { name }).first().locator('> span').first().boundingBox())!;
+      const clear = lb.x >= b.x + b.width || b.x >= lb.x + lb.width || lb.y >= b.y + b.height || b.y >= lb.y + lb.height;
+      expect(clear, `launcher clear of ${name} at ${viewport.width}x${viewport.height}`).toBe(true);
+    }
+    await page.getByTestId('flora-launcher').click();
+    const panel = (await page.getByTestId('flora-panel').boundingBox())!;
+    expect(panel.y).toBeGreaterThanOrEqual(0);
+    expect(panel.y + panel.height).toBeLessThanOrEqual(lb.y + 1);
+    await page.context().close();
+  }
 });
 
 test('a caller can continue on the website with the code Flora read out', async ({ browser }) => {

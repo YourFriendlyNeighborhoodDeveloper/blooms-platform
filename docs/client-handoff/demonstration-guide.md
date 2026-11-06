@@ -88,7 +88,9 @@ Say this early, and keep to it:
 
 ### Part 7: Flora, the AI concierge (2 to 3 minutes, optional)
 
-Flora needs the deployment's own OpenAI key with credits. On the phone line she also needs the number
+Flora needs the deployment's own OpenAI key with credits. Without them she shows **Offline right
+now**. She still opens, says why, and offers the shop, the planner, tracking and the shop's number, so
+the presentation never shows anything broken. The link `/?chat=open` opens her directly. On the phone line she also needs the number
 attached (`scripts/staging.sh flora-line`, after `publish`). Check **Dashboard → Flora** first: both
 channels should say **Answering**. If either does not, skip that part rather than improvise.
 

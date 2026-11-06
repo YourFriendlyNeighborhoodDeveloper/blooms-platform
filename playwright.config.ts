@@ -18,6 +18,8 @@ export default defineConfig({
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'] }, testIgnore: [/mobile\.spec/, /staging\//] },
     { name: 'mobile', use: { ...devices['Pixel 7'] }, testMatch: /mobile\.spec/, testIgnore: /staging\// },
+    // WebKit, Safari's engine, at iPhone size, for Flora's launcher and panel.
+    { name: 'iphone-webkit', use: { ...devices['iPhone 13'] }, testMatch: /flora-mobile\.spec/, testIgnore: /staging\// },
   ],
   webServer: {
     command: 'node scripts/e2e-server.mjs',

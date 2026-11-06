@@ -6,7 +6,7 @@ import { conflict, notFound, tooMany, unavailable } from '../../lib/errors.js';
 import { AiUnavailableError, type ChatItem } from '../../integrations/ai/provider.js';
 import { loadSettings } from '../settings/service.js';
 import { chatCostMicros } from './pricing.js';
-import { accountProblem, addUsage, appendMessage, chatHistory, conciergeAvailability, conversationByToken, noteProviderProblem, startConversation, type Conversation } from './conversations.js';
+import { accountProblem, addUsage, appendMessage, chatHistory, conciergeAvailability, conversationByToken, noteProviderProblem, providerProblem, startConversation, type Conversation } from './conversations.js';
 import { buildInstructions, chatOpening } from './prompt.js';
 import { availableTools, executeTool, type Action, type ToolContext } from './tools.js';
 
@@ -18,13 +18,35 @@ export const chatInputSchema = z.object({
 const MAX_TOOL_ROUNDS = 5;
 const MAX_OUTPUT_TOKENS = 700;
 
-/** What the website shows before the first message: whether Flora is on, and how she introduces herself. */
+/**
+ * What the website shows before the first message. `shown` is whether the owner has set Flora up at
+ * all; only then does the launcher appear. `available` is whether she can answer right now. When she
+ * cannot, the launcher stays visible and says so, rather than disappearing.
+ */
 export async function chatStatus(ctx: AppContext) {
   const settings = await loadSettings(ctx.db);
   const available = await conciergeAvailability(ctx, settings, 'chat');
   const c = settings.concierge;
+  const shown = c.chat_enabled && ctx.ai.enabled && c.monthly_budget_cents > 0;
+  const state = available.ok ? 'online' : available.reason === 'budget_reached' ? 'resting' : 'offline';
+  const problem = available.ok ? null : await providerProblem(ctx.db);
   return {
+    shown,
     available: available.ok,
+    state,
+    status_message:
+      state === 'online'
+        ? null
+        : state === 'resting'
+          ? "She has reached this month's limit and can't answer messages until next month. You can still shop, plan your event, track an order, or call the shop."
+          : "She can't answer messages at the moment. You can still shop, plan your event, track an order, or call the shop.",
+    demo_note:
+      c.chat_mode === 'demo' && problem === 'credits'
+        ? 'Demonstration note: the AI account for this demo has no credits, so Flora is paused until credits are added. She comes back on her own within a few minutes once they are.'
+        : c.chat_mode === 'demo' && problem === 'credentials'
+          ? 'Demonstration note: the AI key for this demo was rejected, so Flora is paused.'
+          : null,
+    phone_e164: settings.contact.phone_e164,
     name: c.assistant_name,
     title: c.assistant_title,
     greeting: chatOpening(settings, c.chat_mode),

@@ -26,6 +26,9 @@ export default defineConfig({
   },
   projects: [
     { name: 'phone', use: { ...devices['iPhone 13'], browserName: 'chromium' }, testMatch: /phone\.spec/ },
+    // Flora's launcher and panel in Safari's engine at iPhone size, and Chrome at Android size.
+    { name: 'iphone-safari', use: { ...devices['iPhone 13'] }, testMatch: /flora-visible\.spec/ },
+    { name: 'android-chrome', use: { ...devices['Pixel 7'] }, testMatch: /flora-visible\.spec/ },
     { name: 'desktop', use: { ...devices['Desktop Chrome'] }, testIgnore: /phone\.spec/ },
   ],
 });

@@ -34,11 +34,15 @@ export interface RealtimeConnection {
   close(): void;
 }
 
+export type ProbeResult = 'ok' | 'credits' | 'credentials' | 'error';
+
 export interface AiProvider {
   readonly name: 'off' | 'mock' | 'openai';
   readonly enabled: boolean;
   respond(request: ChatRequest): Promise<ChatResponse>;
   connectRealtime(model: string): RealtimeConnection;
+  /** One minimal request, to learn whether the account works again. Used only while Flora is paused. */
+  probe(model: string): Promise<ProbeResult>;
 }
 
 export class AiUnavailableError extends Error {}
@@ -52,6 +56,7 @@ export const disabledAi: AiProvider = {
   connectRealtime: () => {
     throw new AiUnavailableError('No AI provider is configured.');
   },
+  probe: async () => 'error',
 };
 
 /** The OpenAI API through its official SDK. Requests are not stored by OpenAI (`store: false`). */
@@ -87,6 +92,18 @@ export function createOpenAiProvider(apiKey: string, log: Logger): AiProvider {
           output_tokens: res.usage?.output_tokens ?? 0,
         },
       };
+    },
+    async probe(model) {
+      try {
+        await client.responses.create({ model, input: 'Reply with OK.', max_output_tokens: 16, store: false });
+        return 'ok';
+      } catch (err) {
+        const e = err as { status?: number; code?: string; message?: string };
+        if (/insufficient_quota|credit|billing/i.test(`${e.code ?? ''} ${e.message ?? ''}`)) return 'credits';
+        if (e.status === 401) return 'credentials';
+        log.warn('provider probe failed', { status: e.status });
+        return 'error';
+      }
     },
     connectRealtime(model) {
       const rt = new OpenAIRealtimeWS({ model }, client);
@@ -126,10 +143,14 @@ export function createOpenAiProvider(apiKey: string, log: Logger): AiProvider {
  * understand: it greets, answers the quick actions with fixed text, and runs a tool only when a
  * test asks for one explicitly with `/tool name {json}`.
  */
-export function createMockAi(): AiProvider & { script: Array<ChatResponse | Error>; realtime: RealtimeConnection[]; realtimeFactory?: (model: string) => RealtimeConnection } {
+export function createMockAi(): AiProvider & { script: Array<ChatResponse | Error>; realtime: RealtimeConnection[]; realtimeFactory?: (model: string) => RealtimeConnection; probeResult: ProbeResult } {
   const mock = {
     name: 'mock' as const,
     enabled: true,
+    probeResult: 'ok' as ProbeResult,
+    async probe(): Promise<ProbeResult> {
+      return mock.probeResult;
+    },
     script: [] as Array<ChatResponse | Error>,
     realtime: [] as RealtimeConnection[],
     realtimeFactory: undefined as undefined | ((model: string) => RealtimeConnection),

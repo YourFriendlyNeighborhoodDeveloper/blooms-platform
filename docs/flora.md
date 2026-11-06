@@ -60,6 +60,27 @@ is used. Blooms does not depend on Eastwood.
 | Review page, continue page | `src/pages/planner/DraftReview.tsx`, `ContinueCall.tsx` |
 | Dashboard | `src/admin/pages/Concierge.tsx`, `ConciergeConversation.tsx`, Settings → Flora, Messages |
 
+## On the website
+
+- **The launcher.** A "Chat with Flora" launcher sits in the bottom-right corner of every customer
+  page.
+  - It appears as soon as the owner has set Flora up: the chat switched on, a provider configured,
+    and a budget set.
+  - It always shows her status: a green dot and "online", or an amber dot and "Offline right now".
+  - On phones it sits above the iPhone home indicator and Safari's toolbar, beside the concept badge.
+    On screens narrower than 380px it moves up a row so they never overlap.
+  - On wide screens it stays above the home page's two main buttons.
+- **On a phone, the conversation opens as a full-screen sheet.** The sheet follows the part of the
+  screen the visitor can actually see, so the text box stays above the keyboard. The text box uses
+  16px type, so Safari on iPhone and iPad does not zoom the page when it is tapped.
+- **When Flora cannot answer:**
+  - A status strip under her name says so and stays in view.
+  - The text box is disabled.
+  - Buttons offer the shop, the planner, order tracking and the shop's phone number.
+  - In demonstration mode a note says why, for example that the demo's AI account has no credits.
+- **A direct link:** `/?chat=open` (or `#chat` on any page) opens Flora straight away, for QR codes
+  and shared links.
+
 ## Two modes
 
 Each channel has its own mode, set in **Settings → Flora**.
@@ -115,8 +136,15 @@ a call in progress is asked to wrap up. Other limits:
 - texts per call, 1.
 
 Flora never buys credits or switches on automatic recharge. If the provider refuses for credits or
-credentials, Flora pauses for 10 minutes and raises a critical alert in the dashboard. During the
-pause the widget is hidden and the phone line says the assistant is unavailable.
+credentials, Flora pauses and raises a critical alert in the dashboard. The pause is recorded in the
+database, so it survives restarts.
+
+- **Checks:** the worker checks the provider once after each start, and every minute while she is
+  paused. The first check of a pause waits two minutes.
+- **Resuming:** she comes back by herself as soon as the provider answers.
+- **Cost:** a refused check costs nothing; a successful one costs a fraction of a cent.
+- **While paused:** the chat launcher stays on screen and says "Offline right now" (see below), and
+  the phone line says the assistant is unavailable.
 
 Rough figures from the published rates, checked 2026-11-05:
 
@@ -174,6 +202,8 @@ entirely. No call audio is recorded or stored. The greeting says calls are trans
 | --- | --- |
 | Tools, scoping, refusals, identity checks, sandbox isolation, conversion, budgets, limits, escalation, retention, signatures, the phone bridge (with stand-ins for Twilio and OpenAI) | Server tests: `server/modules/concierge/concierge.test.ts` |
 | Chat widget, plan saved from chat, review page prefilled and edited, sent to the sandbox, dashboard | Browser test: `e2e/flora.spec.ts` (scripted model) |
+| Launcher on screen without scrolling, uncovered, clear of the concept badge and the home page's buttons; panel fits the phone screen, including with half the screen taken by a keyboard; offline state | Browser tests: `e2e/flora-mobile.spec.ts` in Chromium (Pixel 7) and WebKit, Safari's engine (iPhone 13); `e2e/flora.spec.ts` at three desktop sizes |
+| The same on the deployed site, through its public address | `e2e/staging/flora-visible.spec.ts`, run by `scripts/staging.sh verify` in WebKit at iPhone size, Chrome at Android size, and desktop Chrome. Also checked by hand in real Mobile Safari on an iPhone 16 in the iOS Simulator |
 | OpenAI API reached with the real key | **Yes**, 2026-11-05. The key is valid and lists the realtime models |
 | A real AI conversation | **Not yet.** OpenAI refused with "You have no credits remaining" (chat: HTTP 429; realtime: `credit_balance_exhausted`). Flora degraded as designed: an apology in chat; on the phone, the call marked failed and an apology spoken |
 | The phone path through the real server | Signed webhook, TwiML, one-time token, media WebSocket and Realtime connection exercised live with a synthetic caller. The model refused for credits, as above |

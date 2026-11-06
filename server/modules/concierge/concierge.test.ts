@@ -16,7 +16,7 @@ import { VoiceCall } from './voice.js';
 import { escalateOverdueTickets } from './tickets.js';
 import { purgeOldTranscripts } from './sweeps.js';
 import { chatCostMicros, realtimeCostMicros, telephonyCostMicros, transcriptionCostMicros } from './pricing.js';
-import { resetProviderPause } from './conversations.js';
+import { resetProviderPause, resumeIfProviderRecovered } from './conversations.js';
 
 const AUTH = 'test-twilio-auth-token';
 const BASE = 'https://flora.demo.example';
@@ -95,6 +95,7 @@ beforeEach(async () => {
   sms.sent.length = 0;
   sms.enabled = true;
   ai.script.length = 0;
+  ai.probeResult = 'ok';
   resetProviderPause();
   h.clock.set('2026-11-10T16:00:00Z');
 });
@@ -115,11 +116,48 @@ describe('Flora is off until the owner turns her on', () => {
     const res = await chat(b, 'hello');
     expect(res.json.reply).toMatch(/trouble answering/);
     const alert = await ctx.db.selectFrom('system_alerts').select(['code', 'severity']).executeTakeFirstOrThrow();
-    expect(alert).toEqual({ code: 'concierge_provider_unavailable', severity: 'critical' });
-    expect((await b.get('/api/public/concierge/status')).json.available).toBe(false);
+    expect(alert).toEqual({ code: 'concierge_provider_credits', severity: 'critical' });
+    // The launcher stays visible and says so, instead of disappearing.
+    const status = (await b.get('/api/public/concierge/status')).json;
+    expect(status).toMatchObject({ shown: true, available: false, state: 'offline' });
+    expect(status.status_message).toMatch(/can't answer messages at the moment/);
+    expect(status.demo_note).toMatch(/no credits/);
     const call = await twilioPost('incoming', { CallSid: callSid(), From: CALLER, To: VOICE_NUMBER });
     expect(call.text).toMatch(/not available right now/);
+    // The pause survives a restart, because it is recorded in the database, not in memory.
     resetProviderPause();
+    expect((await b.get('/api/public/concierge/status')).json.available).toBe(false);
+    // The worker checks the provider, but not in the first couple of minutes of a pause.
+    expect(await resumeIfProviderRecovered(ctx)).toBe('waiting');
+    await sql`UPDATE system_alerts SET created_at = now() - interval '5 minutes'`.execute(ctx.db);
+    // Still refusing: nothing changes. Answering again: Flora is back.
+    ai.probeResult = 'credits';
+    expect(await resumeIfProviderRecovered(ctx)).toBe('credits');
+    expect((await b.get('/api/public/concierge/status')).json.available).toBe(false);
+    ai.probeResult = 'ok';
+    expect(await resumeIfProviderRecovered(ctx)).toBe('resumed');
+    expect((await b.get('/api/public/concierge/status')).json).toMatchObject({ shown: true, available: true, state: 'online', status_message: null });
+    expect((await ctx.db.selectFrom('system_alerts').select('status').executeTakeFirstOrThrow()).status).toBe('resolved');
+  });
+
+  it('checks the provider once after a start, so a refused account shows as offline before any visitor tries', async () => {
+    // A check while Flora is still switched off, as during a fresh seed, does not use up the one check.
+    ai.probeResult = 'credits';
+    expect(await resumeIfProviderRecovered(ctx)).toBe('not_paused');
+    ai.probeResult = 'ok';
+    await enableFlora();
+    const b = h.browser();
+    expect((await b.get('/api/public/concierge/status')).json.state).toBe('online');
+    ai.probeResult = 'credits';
+    expect(await resumeIfProviderRecovered(ctx)).toBe('paused');
+    expect((await b.get('/api/public/concierge/status')).json).toMatchObject({ shown: true, available: false, state: 'offline' });
+    // Only once per start: the next run is the ordinary paused check, which waits a couple of minutes.
+    expect(await resumeIfProviderRecovered(ctx)).toBe('waiting');
+  });
+
+  it('keeps the launcher hidden until the owner has set Flora up', async () => {
+    const status = (await h.browser().get('/api/public/concierge/status')).json;
+    expect(status).toMatchObject({ shown: false, available: false });
   });
 
   it('stops at the monthly budget', async () => {

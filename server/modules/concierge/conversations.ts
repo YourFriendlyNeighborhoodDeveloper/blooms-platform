@@ -4,7 +4,7 @@ import type { Db } from '../../db/client.js';
 import { generateReference, hashToken, randomToken } from '../../lib/tokens.js';
 import { localDate } from '../../lib/time.js';
 import type { ChatItem } from '../../integrations/ai/provider.js';
-import type { SettingsState } from '../settings/service.js';
+import { loadSettings, type SettingsState } from '../settings/service.js';
 import { telephonyCostMicros } from './pricing.js';
 import { raiseAlert } from '../../automation/events.js';
 
@@ -167,13 +167,16 @@ export async function monthToDateMicros(ctx: Pick<AppContext, 'db' | 'clock'>, s
 export type Availability = { ok: true } | { ok: false; reason: 'disabled' | 'no_provider' | 'provider_unavailable' | 'no_budget' | 'budget_reached'; message: string };
 
 // When the provider refuses for money or credentials, every further request would fail the same way.
-// Flora pauses for a while instead, and the owner gets an alert. She never buys credits herself.
-const PAUSE_MS = 10 * 60_000;
-let pausedUntil = 0;
-let pauseReason = '';
+// Flora pauses instead: an open alert in the database records it, so every process and every restart
+// agrees, and the owner sees it. The worker checks the provider every few minutes and resumes her once
+// it answers again. She never buys credits herself.
+export type ProviderProblem = 'credits' | 'credentials';
+const ALERT_CODE: Record<ProviderProblem, string> = { credits: 'concierge_provider_credits', credentials: 'concierge_provider_credentials' };
+const PAUSE_CACHE_MS = 5_000;
+let pauseCache: { at: number; problem: ProviderProblem | null } = { at: 0, problem: null };
 
 /** Whether an error means the provider will refuse everything until a person fixes the account. */
-export function accountProblem(err: unknown): 'credits' | 'credentials' | null {
+export function accountProblem(err: unknown): ProviderProblem | null {
   const e = err as { status?: number; code?: string; type?: string; message?: string; error?: { code?: string; type?: string } };
   const code = `${e.code ?? e.error?.code ?? ''} ${e.type ?? e.error?.type ?? ''} ${e.message ?? ''}`;
   if (/insufficient_quota|credit_balance_exhausted|billing_hard_limit|no credits/i.test(code)) return 'credits';
@@ -181,22 +184,69 @@ export function accountProblem(err: unknown): 'credits' | 'credentials' | null {
   return null;
 }
 
-export async function noteProviderProblem(ctx: Pick<AppContext, 'db' | 'log'>, kind: 'credits' | 'credentials') {
-  pausedUntil = Date.now() + PAUSE_MS;
-  pauseReason = kind === 'credits' ? 'The AI provider account has no credits left.' : 'The AI provider rejected the API key.';
+export async function noteProviderProblem(ctx: Pick<AppContext, 'db' | 'log'>, kind: ProviderProblem) {
+  pauseCache = { at: Date.now(), problem: kind };
   ctx.log.error('concierge paused: provider account problem', { kind });
   await raiseAlert(ctx.db, {
-    code: 'concierge_provider_unavailable',
+    code: ALERT_CODE[kind],
     severity: 'critical',
     title: kind === 'credits' ? 'Flora is paused: the AI provider has no credits' : 'Flora is paused: the AI provider rejected the key',
-    detail: kind === 'credits' ? 'OpenAI refused requests because the account has no credits. Flora never buys credits. Add credits or a budget in the OpenAI dashboard; Flora tries again within 10 minutes.' : 'Check OPENAI_API_KEY in the deployment secrets.',
+    detail:
+      kind === 'credits'
+        ? 'OpenAI refused requests because the account has no credits. Flora never buys credits. Add credits or a budget in the OpenAI dashboard; Flora checks every few minutes and comes back on her own.'
+        : 'Check OPENAI_API_KEY in the deployment secrets. Flora checks every few minutes and comes back on her own.',
     link: '/admin/flora',
-    dedupeKey: 'concierge-provider-unavailable',
+    dedupeKey: `concierge-provider-${kind}`,
   });
 }
 
+/** The open provider problem, if any. Cached briefly, because every page load asks. */
+export async function providerProblem(db: Db): Promise<ProviderProblem | null> {
+  if (Date.now() - pauseCache.at < PAUSE_CACHE_MS) return pauseCache.problem;
+  const rows = await db.selectFrom('system_alerts').select('code').where('code', 'in', Object.values(ALERT_CODE)).where('status', '<>', 'resolved').execute();
+  const problem = rows.some((r) => r.code === ALERT_CODE.credentials) ? 'credentials' : rows.length ? 'credits' : null;
+  pauseCache = { at: Date.now(), problem };
+  return problem;
+}
+
+/**
+ * Run by the worker while Flora is paused. One tiny request: if the provider answers, the alerts are
+ * resolved and Flora is back. If it still refuses, nothing changes.
+ */
+let checkedSinceStart = false;
+
+export async function resumeIfProviderRecovered(ctx: AppContext) {
+  if (!ctx.ai.enabled) return 'not_configured';
+  const open = await ctx.db.selectFrom('system_alerts').select(['id', 'created_at']).where('code', 'in', Object.values(ALERT_CODE)).where('status', '<>', 'resolved').execute();
+  if (!open.length) {
+    // Once after each start, check the account, so a restart or a reset never shows Flora as online
+    // when the provider will refuse her. A refused check costs nothing; a working one, a fraction of a cent.
+    if (checkedSinceStart) return 'not_paused';
+    const settings = await loadSettings(ctx.db);
+    // Not switched on yet, for example during a fresh seed: check on a later run instead.
+    if (!settings.concierge.chat_enabled && !settings.concierge.voice_enabled) return 'not_paused';
+    checkedSinceStart = true;
+    const result = await ctx.ai.probe(settings.concierge.chat_model);
+    if (result === 'credits' || result === 'credentials') {
+      await noteProviderProblem(ctx, result);
+      return 'paused';
+    }
+    return 'not_paused';
+  }
+  // The first check waits a couple of minutes, so a pause never flickers off and on.
+  if (open.every((r) => Date.now() - new Date(r.created_at).getTime() < 2 * 60_000)) return 'waiting';
+  const settings = await loadSettings(ctx.db);
+  const result = await ctx.ai.probe(settings.concierge.chat_model);
+  if (result !== 'ok') return result;
+  await ctx.db.updateTable('system_alerts').set({ status: 'resolved', resolved_at: new Date() }).where('id', 'in', open.map((r) => r.id)).execute();
+  pauseCache = { at: 0, problem: null };
+  ctx.log.info('concierge resumed: the provider answers again');
+  return 'resumed';
+}
+
 export const resetProviderPause = () => {
-  pausedUntil = 0;
+  pauseCache = { at: 0, problem: null };
+  checkedSinceStart = false;
 };
 
 /** Whether Flora may start or continue work on a channel right now. */
@@ -205,7 +255,8 @@ export async function conciergeAvailability(ctx: AppContext, settings: SettingsS
   if (channel === 'chat' && !c.chat_enabled) return { ok: false, reason: 'disabled', message: 'The assistant is switched off.' };
   if (channel === 'voice' && (!c.voice_enabled || !ctx.voice.enabled)) return { ok: false, reason: 'disabled', message: 'The phone assistant is switched off.' };
   if (!ctx.ai.enabled) return { ok: false, reason: 'no_provider', message: 'No AI provider is configured.' };
-  if (Date.now() < pausedUntil) return { ok: false, reason: 'provider_unavailable', message: `${pauseReason} Flora is paused.` };
+  const problem = await providerProblem(ctx.db);
+  if (problem) return { ok: false, reason: 'provider_unavailable', message: problem === 'credits' ? 'The AI provider account has no credits left. Flora is paused.' : 'The AI provider rejected the API key. Flora is paused.' };
   if (c.monthly_budget_cents <= 0) return { ok: false, reason: 'no_budget', message: 'No monthly budget is set for the assistant.' };
   const spent = await monthToDateMicros(ctx, settings);
   if (spent >= c.monthly_budget_cents * 10_000) return { ok: false, reason: 'budget_reached', message: "This month's assistant budget has been used." };

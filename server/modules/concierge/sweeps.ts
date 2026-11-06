@@ -2,6 +2,7 @@ import { sql } from 'kysely';
 import type { AppContext } from '../../context.js';
 import { getSetting } from '../settings/service.js';
 import { escalateOverdueTickets } from './tickets.js';
+import { resumeIfProviderRecovered } from './conversations.js';
 
 /** Removes what people said after the owner's retention period. The record of what Flora did stays. */
 export async function purgeOldTranscripts(ctx: AppContext) {
@@ -44,6 +45,7 @@ export async function closeIdleConversations(ctx: AppContext) {
 
 export const CONCIERGE_SWEEPS = [
   { name: 'concierge.escalate', everyMinutes: 1, run: (ctx: AppContext) => escalateOverdueTickets(ctx) },
+  { name: 'concierge.provider_check', everyMinutes: 1, run: (ctx: AppContext) => resumeIfProviderRecovered(ctx) },
   { name: 'concierge.close_idle', everyMinutes: 15, run: (ctx: AppContext) => closeIdleConversations(ctx) },
   { name: 'concierge.expire_drafts', everyMinutes: 60, run: (ctx: AppContext) => expireDrafts(ctx) },
   { name: 'concierge.retention', everyMinutes: 60, run: (ctx: AppContext) => purgeOldTranscripts(ctx) },

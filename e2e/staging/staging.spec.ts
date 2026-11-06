@@ -216,12 +216,14 @@ test.describe('Rules that protect the shop', () => {
     const limit = new Date(Date.now() + 72 * 3_600_000).toLocaleDateString('en-CA', { timeZone: 'America/Detroit' });
     expect(soonest && soonest.date >= limit.slice(0, 10)).toBeTruthy();
 
-    // Today is never offered after the same-day cutoff, or without time to prepare.
+    // After the demo's 1 p.m. same-day cutoff, today is never offered. Before it, today is a real option.
     const roses = await slotsFor('demo-classic-roses', 'delivery');
-    for (const s of roses.filter((x) => x.date === today())) expect(s.status).toBe('blocked');
+    const nowLocal = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Detroit' });
+    if (nowLocal >= '13:00') for (const s of roses.filter((x) => x.date === today())) expect(s.status).toBe('blocked');
 
     // The Saturday morning window filled by the demo orders.
-    const full = roses.find((s) => s.reasons.some((r) => r.code === 'capacity_stops'));
+    // Full because of its stops alone: on the driver's day off every window also reports full.
+    const full = roses.find((s) => s.reasons.some((r) => r.code === 'capacity_stops') && !s.reasons.some((r) => r.code === 'no_driver'));
     expect(full, 'a delivery window that is full').toBeTruthy();
     expect(hour(full?.start as string)).toBe('10:00');
     const sameDayAfternoon = roses.find((s) => s.date === full?.date && hour(s.start) === '14:00');

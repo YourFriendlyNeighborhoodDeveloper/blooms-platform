@@ -372,8 +372,13 @@ test('Scenario F: with Twilio disabled, orders work and no text is attempted', a
   await staff.goto(`/admin/orders/${order.id}`);
   await staff.getByRole('button', { name: 'Mark ready' }).click();
   await staff.getByRole('button', { name: 'Mark picked up' }).click();
-  await customer.reload();
-  await expect(customer.getByText('Fulfilled').first()).toBeVisible();
+  // The click returns before the server has recorded it, so reload until the tracking page catches up.
+  await expect
+    .poll(async () => {
+      await customer.reload();
+      return customer.getByText('Fulfilled').first().isVisible();
+    }, { timeout: 30_000 })
+    .toBe(true);
   await staff.context().close();
   await customer.context().close();
 });

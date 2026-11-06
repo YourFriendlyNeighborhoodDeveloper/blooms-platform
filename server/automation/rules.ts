@@ -6,7 +6,7 @@ import { buildVariables, queueNotification } from '../modules/notifications/serv
 
 type RuleConfig = { template?: string; roles?: string[]; title?: string; description?: string; capability?: string; due_in_minutes?: number; priority?: string };
 
-async function staffRecipients(ctx: AppContext, roles: string[]) {
+export async function staffRecipients(ctx: AppContext, roles: string[]) {
   if (!roles.length) return [];
   return ctx.db
     .selectFrom('users')

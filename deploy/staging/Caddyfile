@@ -11,6 +11,11 @@
 		output stdout
 		format json
 	}
+	# The team dashboard, its API and the test mailbox sit behind a second password, checked here
+	# before the application's own sign-in. The shop, tracking pages and simulated payments stay open.
+	# gate.caddy holds only a bcrypt hash. scripts/staging.sh writes it, and it is never committed.
+	@staff path /admin /admin/* /api/admin /api/admin/* /mailbox /mailbox/*
+	import /etc/caddy/gate.caddy
 	handle /mailbox* {
 		reverse_proxy mailpit:8025
 	}

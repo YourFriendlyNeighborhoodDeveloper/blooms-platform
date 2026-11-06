@@ -219,6 +219,101 @@ export interface Carts {
   updated_at: Generated<Timestamp>;
 }
 
+export interface ConciergeConversations {
+  audio_input_tokens: Generated<Int8>;
+  audio_output_tokens: Generated<Int8>;
+  cached_tokens: Generated<Int8>;
+  call_seconds: number | null;
+  call_sid: string | null;
+  caller_phone_e164: string | null;
+  channel: string;
+  client_token_hash: string | null;
+  converted_inquiry_id: string | null;
+  created_at: Generated<Timestamp>;
+  end_reason: string | null;
+  ended_at: Timestamp | null;
+  est_cost_micros: Generated<Int8>;
+  id: Generated<string>;
+  input_tokens: Generated<Int8>;
+  ip_hash: string | null;
+  last_activity_at: Generated<Timestamp>;
+  mode: string;
+  model: string | null;
+  outcome: string | null;
+  output_tokens: Generated<Int8>;
+  reference: string;
+  started_at: Generated<Timestamp>;
+  status: Generated<string>;
+  texts_sent: Generated<number>;
+  tool_calls: Generated<number>;
+  transcript_purged_at: Timestamp | null;
+  turns: Generated<number>;
+  updated_at: Generated<Timestamp>;
+  user_agent: string | null;
+}
+
+export interface ConciergeDrafts {
+  contact_email: string | null;
+  contact_name: string | null;
+  contact_phone_e164: string | null;
+  continue_code_expires_at: Timestamp | null;
+  continue_code_hash: string | null;
+  continue_failures: Generated<number>;
+  conversation_id: string | null;
+  created_at: Generated<Timestamp>;
+  data: Generated<Json>;
+  expires_at: Timestamp;
+  id: Generated<string>;
+  inquiry_id: string | null;
+  link_channel: string | null;
+  link_sent_at: Timestamp | null;
+  preferred_consultation_at: Timestamp | null;
+  reference: string;
+  sandbox: boolean;
+  sandbox_result: Json | null;
+  status: Generated<string>;
+  submitted_at: Timestamp | null;
+  updated_at: Generated<Timestamp>;
+}
+
+export interface ConciergeKnowledge {
+  body: string;
+  created_at: Generated<Timestamp>;
+  id: Generated<string>;
+  is_demo: Generated<boolean>;
+  keywords: Generated<string>;
+  published: Generated<boolean>;
+  search: Generated<string | null>;
+  title: string;
+  updated_at: Generated<Timestamp>;
+  updated_by: string | null;
+}
+
+export interface ConciergeMessages {
+  content: string | null;
+  conversation_id: string;
+  created_at: Generated<Timestamp>;
+  id: Generated<string>;
+  position: Generated<Int8>;
+  refused: Generated<boolean>;
+  role: string;
+  tool_args: Json | null;
+  tool_call_id: string | null;
+  tool_name: string | null;
+  tool_result: Json | null;
+}
+
+export interface ConciergeVerifications {
+  code_hash: string;
+  conversation_id: string;
+  created_at: Generated<Timestamp>;
+  expires_at: Timestamp;
+  failures: Generated<number>;
+  id: Generated<string>;
+  order_id: string;
+  verified_at: Timestamp | null;
+}
+
 export interface Consultations {
   cancelled_reason: string | null;
   created_at: Generated<Timestamp>;
@@ -1282,16 +1377,24 @@ export interface Suppliers {
 }
 
 export interface SupportRequests {
+  acknowledged_at: Timestamp | null;
+  acknowledged_by: string | null;
   assigned_to: string | null;
+  category: Generated<string>;
+  conversation_id: string | null;
   created_at: Generated<Timestamp>;
   customer_id: string | null;
-  email: string;
+  due_at: Timestamp | null;
+  email: string | null;
+  escalated_at: Timestamp | null;
   id: Generated<string>;
   message: string;
   name: string;
   order_id: string | null;
   phone_e164: string | null;
+  priority: Generated<string>;
   reference: string;
+  sandbox: Generated<boolean>;
   source: string | null;
   status: Generated<string>;
   topic: string;
@@ -1494,6 +1597,11 @@ export interface DB {
   capacity_overrides: CapacityOverrides;
   cart_items: CartItems;
   carts: Carts;
+  concierge_conversations: ConciergeConversations;
+  concierge_drafts: ConciergeDrafts;
+  concierge_knowledge: ConciergeKnowledge;
+  concierge_messages: ConciergeMessages;
+  concierge_verifications: ConciergeVerifications;
   consultations: Consultations;
   content_blocks: ContentBlocks;
   customer_addresses: CustomerAddresses;

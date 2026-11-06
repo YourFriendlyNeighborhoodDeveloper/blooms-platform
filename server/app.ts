@@ -10,6 +10,7 @@ import { AppError, mapDatabaseError } from './lib/errors.js';
 import { originGuard, requireStaff, withContext } from './http/middleware.js';
 import { publicRoutes } from './routes/public.js';
 import { webhookRoutes } from './routes/webhooks.js';
+import { conciergeRoutes, voiceWebhookRoutes } from './routes/concierge.js';
 import { devRoutes } from './routes/dev.js';
 import { adminAuthRoutes, adminSessionRoutes } from './routes/admin-auth.js';
 import { adminOrderRoutes, adminFulfillmentRoutes } from './routes/admin-orders.js';
@@ -72,7 +73,9 @@ export function createApp(ctx: AppContext) {
     c.header('Cache-Control', 'no-store');
   });
 
+  app.route('/api/webhooks/voice', voiceWebhookRoutes);
   app.route('/api/webhooks', webhookRoutes);
+  app.route('/api/public/concierge', conciergeRoutes);
   app.route('/api/public', publicRoutes);
   app.route('/api/account', accountRoutes);
   app.route('/api/admin/auth', adminAuthRoutes);
@@ -96,7 +99,7 @@ export function createApp(ctx: AppContext) {
 }
 
 // Top-level app routes that have no HTML shell of their own. Everything else is a true 404.
-const KNOWN_ROUTES = new Set(['', 'admin', 'cart', 'checkout', 'track', 'quote', 'pay', 'project', 'account', 'preferences', 'privacy', 'terms', 'shop', 'plan', 'live', 'flowers', 'weddings-events', 'rentals', 'boutique', 'about', 'contact']);
+const KNOWN_ROUTES = new Set(['', 'admin', 'cart', 'checkout', 'track', 'quote', 'pay', 'project', 'account', 'preferences', 'privacy', 'terms', 'shop', 'plan', 'live', 'flowers', 'weddings-events', 'rentals', 'boutique', 'about', 'contact', 'continue']);
 
 /** Serves the built site, preferring each route's own HTML shell so link previews see the right tags. */
 function mountSpa(app: Hono<AppEnv>, ctx: AppContext) {
@@ -124,7 +127,7 @@ function mountSpa(app: Hono<AppEnv>, ctx: AppContext) {
     const clean = c.req.path.replace(/\/$/, '') || '/';
     const shell = clean === '/' ? 'index.html' : `${clean.slice(1)}.html`;
     const isShell = /^[\w-]+\.html$/.test(shell) && fs.existsSync(path.join(root, shell));
-    const privatePage = /^\/(admin|account|track|checkout|cart|quote|pay|plan|project|preferences)(\/|$)/.test(clean);
+    const privatePage = /^\/(admin|account|track|checkout|cart|quote|pay|plan|project|preferences|continue)(\/|$)/.test(clean);
     if (!indexable || privatePage) c.header('X-Robots-Tag', 'noindex, nofollow');
     c.header('Cache-Control', 'no-cache');
     if (isShell) return c.html(html(shell));

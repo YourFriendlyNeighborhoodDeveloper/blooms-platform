@@ -124,7 +124,7 @@ const rentalsOf = (selected: SelectedItem[]) => selected.flatMap((s) => (s.renta
  * reserves nothing: a booking row records the requested date, but holds and crews come only after a
  * person approves. An inquiry can never guarantee a date.
  */
-export async function submitPlan(ctx: AppContext, input: PlanInput, actor: Actor, userAgent?: string | null) {
+export async function submitPlan(ctx: AppContext, input: PlanInput, actor: Actor, userAgent?: string | null, source: 'planner' | 'flora' | 'flora_conversion' = 'planner') {
   // A retry returns its own plan. A key used with another email address reveals nothing about that plan.
   const inquiryForKey = () =>
     ctx.db
@@ -158,9 +158,9 @@ export async function submitPlan(ctx: AppContext, input: PlanInput, actor: Actor
 
   try {
     const created = await ctx.db.transaction().execute(async (trx) => {
-      const customerId = await upsertCustomer(trx, input.contact, 'wedding_planner');
+      const customerId = await upsertCustomer(trx, input.contact, source === 'planner' ? 'wedding_planner' : source);
       await recordConsents(trx, customerId, toE164(input.contact.phone), input.consents, {
-        source: 'wedding_planner',
+        source: source === 'planner' ? 'wedding_planner' : source,
         ip: actor.ip,
         userAgent,
         smsTransactionalText: settings.sms.consent_text_transactional,
@@ -186,7 +186,7 @@ export async function submitPlan(ctx: AppContext, input: PlanInput, actor: Actor
           availability: JSON.stringify({ status: availability.status, summary: availability.summary, reasons: availability.reasons, alternatives: availability.alternatives }),
           estimate: JSON.stringify(estimate),
           idempotency_key: input.idempotency_key,
-          source: 'planner',
+          source,
           attribution: JSON.stringify(input.attribution ?? {}),
           is_test: !ctx.payments.livemode,
         })

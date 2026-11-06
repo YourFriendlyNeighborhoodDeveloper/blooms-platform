@@ -55,6 +55,8 @@ customer-facing ones also by browser tests in Chrome, on desktop and phone-sized
 | Google Calendar push | Queueing tested. The Google API itself has not been called. | An OAuth client and refresh token for the shared calendar |
 | S3-compatible storage | Verified with signed requests against an S3-compatible server | A bucket and keys from the chosen provider |
 | Facebook | Embeds by public link. No credentials needed. | The Page's video links |
+| OpenAI (Flora's chat and phone) | Adapter on the official SDK. Every behavior tested with a scripted stand-in. The real key was reached on 2026-11-05 and is valid, but the account has **no credits**, so no real AI conversation has run. | A dedicated OpenAI project and key for this business, with credits and a monthly budget |
+| Twilio Voice (Flora's phone line) | Webhooks signature-checked; media bridge tested with stand-in sockets, and once live through the real server with a synthetic caller. No real inbound call yet. | A public address, the number attached (`scripts/staging.sh flora-line`), and on the current trial account, a verified calling phone |
 
 ## 3. Business rules awaiting owner approval
 
@@ -111,15 +113,17 @@ Run on 2026-11-05, on the developer's machine.
 | Backup and restore | Backup taken with the script, restored into an empty database, row counts matched, all record checks passed on the copy, the audit log stayed append-only, and the script refused to overwrite a non-empty database |
 | Production dependency audit | 0 vulnerabilities |
 | Real Stripe test-mode payment | **Not run.** No business Stripe account is connected. |
+| Flora (added later the same day) | Server tests **25 of 25** in `concierge.test.ts`, within a full run of **185 passed, 6 skipped**. Browser test `e2e/flora.spec.ts` passed. Live: OpenAI reached with a valid key but refused for credits; Twilio webhook, token and media path exercised with a synthetic caller. See [flora.md](flora.md#verified-and-not-yet). |
+| Planner defect found by Flora's browser test | Fixed. Clicking **Continue** on the date step sent the plan one step early, skipping the final step with its opt-in boxes, because the browser reused the button as it changed to **Send my plan**. The two buttons are now separate elements, and the form sends only from the last step. The accessibility test had been passing on the resulting thank-you page, and now checks the real last step. That uncovered a keyboard gap on the empty Pipeline board, now fixed. |
 
 How to reproduce each of these is in [testing.md](testing.md) and [operations.md](operations.md).
 
 ## 6. Actual deployment status
 
-**Not deployed.** Nothing was published, and nothing has been committed to Git. All of this work sits
-as uncommitted changes on the `main` branch of the local repository, which has no remote. The public
-preview at `abraxas-blooms-concept.pages.dev` still serves the static concept from 2026-10-31,
-unchanged. The production Compose stack ran only on the developer's machine, and was then removed.
+- **Code:** committed on the `platform` branch and pushed to a private GitHub repository, with git bundle backups on the developer's machine. Flora's work is committed separately.
+- **Staging demonstration:** runs in Docker on the developer's machine at `https://localhost:8443` (`scripts/staging.sh`), with fictional data, simulated payments and captured email. A team gate protects `/admin` and `/mailbox`. Publishing it to a public address is a separate step that the developer runs.
+- **Public preview:** `abraxas-blooms-concept.pages.dev` still serves the static concept from 2026-10-31, unchanged.
+- **Production:** not deployed.
 
 ## 7. Security and operational considerations
 
@@ -179,3 +183,4 @@ and open http://localhost:8787.
 8. One end-to-end rehearsal in the real environment: an order, a delivery, a wedding inquiry, a quote, a deposit and a refund, using the business's real settings.
 9. Staff trained with [staff-guide.md](staff-guide.md), and their accounts and schedules entered.
 10. If text messages are wanted: A2P 10DLC registration approved, then a test with a team member's phone.
+11. If Flora is wanted: the business's own OpenAI key with credits and a budget, the knowledge base written, a phone number in the business's name if the phone line is wanted, a real call and chat reviewed in the dashboard, and each channel switched from the sandbox to the real business only then. See [flora.md](flora.md).

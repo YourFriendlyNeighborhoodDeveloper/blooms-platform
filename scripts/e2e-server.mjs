@@ -26,6 +26,8 @@ const env = {
   PAYMENTS_MODE: 'mock',
   EMAIL_PROVIDER: 'log',
   SMS_ENABLED: 'false',
+  // Flora runs on the scripted stand-in: no AI provider is called from the browser tests.
+  AI_PROVIDER: 'mock',
   STORAGE_LOCAL_DIR: path.join(root, 'test-results', 'e2e-storage'),
   DEMO_PASSWORD: 'e2e-password-not-secret',
 };

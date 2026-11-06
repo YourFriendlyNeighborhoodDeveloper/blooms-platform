@@ -163,6 +163,13 @@ export const TEMPLATES: TemplateDef[] = [
     body: `Use this link to sign in. It works once and expires in 30 minutes.\n\n{{login.url}}\n\nIf you did not ask for this, you can ignore this email.${sign}`,
   },
   {
+    code: 'concierge_verification_code',
+    name: 'Order verification code',
+    audience: 'customer',
+    subject: 'Your {{business.name}} verification code',
+    body: `Your verification code is {{verification.code}}\n\nYou or someone using your order number asked Flora, the shop's automated assistant, about order {{order.reference}}. Share this code with Flora only if that was you. It expires in 10 minutes.\n\nIf you did not ask, you can ignore this email: nothing about your order was shared.${sign}`,
+  },
+  {
     code: 'support_received',
     name: 'Message received',
     audience: 'customer',
@@ -415,6 +422,20 @@ export const TEMPLATES: TemplateDef[] = [
     body: `{{support.name}} ({{support.email}})\n\n{{support.message}}\n\n{{support.admin_url}}`,
   },
   {
+    code: 'staff_concierge_ticket',
+    name: 'Request from Flora',
+    audience: 'staff',
+    subject: '{{ticket.priority_label}}{{ticket.topic}} from {{ticket.name}}',
+    body: `Flora, the website and phone assistant, passed on a request that needs a person.\n\n{{ticket.message}}\n\nContact: {{ticket.contact}}\nReference: {{ticket.reference}}\n\nPlease acknowledge it in the dashboard so it is not escalated:\n{{ticket.admin_url}}`,
+  },
+  {
+    code: 'staff_concierge_escalation',
+    name: 'Request not yet acknowledged',
+    audience: 'staff',
+    subject: 'Not yet acknowledged: {{ticket.topic}} from {{ticket.name}}',
+    body: `This {{ticket.priority}} request from Flora has not been acknowledged since {{ticket.created_at}}.\n\n{{ticket.message}}\n\nContact: {{ticket.contact}}\nReference: {{ticket.reference}}\n\n{{ticket.admin_url}}`,
+  },
+  {
     code: 'staff_invite',
     name: 'Team invitation',
     audience: 'staff',
@@ -449,6 +470,8 @@ const STAFF_ALERTS: Record<string, string[]> = {
   staff_invoice_overdue: ['owner', 'administrator', 'finance'],
   staff_job_failed: ['owner', 'administrator'],
   staff_new_support_request: ['owner', 'administrator', 'sales'],
+  staff_concierge_ticket: ['owner', 'administrator'],
+  staff_concierge_escalation: ['owner'],
 };
 
 /** Event-to-message wiring. Each row is editable and can be switched off in the dashboard. */

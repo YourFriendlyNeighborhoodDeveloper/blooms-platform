@@ -32,6 +32,8 @@ export const PERMISSIONS = {
   'settings.manage': ['Settings', 'Change business rules and policies'],
   'templates.manage': ['Settings', 'Edit message templates and automation rules'],
   'integrations.manage': ['Settings', 'See integration status and run verification'],
+  'concierge.view': ['Flora', 'Read Flora conversations, transcripts and costs'],
+  'concierge.manage': ['Flora', "Edit Flora's knowledge base and clear the demonstration sandbox"],
   'audit.view': ['System', 'Read the audit log'],
   'system.manage': ['System', 'Review failed jobs and system alerts'],
 } as const satisfies Record<string, readonly [string, string]>;
@@ -54,7 +56,7 @@ export const SYSTEM_ROLES: Array<{ code: string; name: string; description: stri
     description: 'Works inquiries and consultations, and sends quotes.',
     permissions: [
       'orders.view', 'orders.financials', 'customers.view', 'customers.manage', 'weddings.view', 'weddings.manage',
-      'weddings.financials', 'quotes.manage', 'calendar.view', 'calendar.manage', 'tasks.view', 'tasks.manage',
+      'weddings.financials', 'quotes.manage', 'calendar.view', 'calendar.manage', 'tasks.view', 'tasks.manage', 'concierge.view',
     ],
   },
   {

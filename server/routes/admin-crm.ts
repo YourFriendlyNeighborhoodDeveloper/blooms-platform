@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { acknowledgeTicket } from '../modules/concierge/tickets.js';
 import { z } from 'zod';
 import { sql } from 'kysely';
 import type { AppEnv } from '../http/types.js';
@@ -105,17 +106,37 @@ adminCustomerRoutes.get('/export/all.csv', async (c) => {
 
 export const adminMessageRoutes = new Hono<AppEnv>();
 
+/** Website messages and Flora's requests in one queue. Demonstration requests are kept apart. */
 adminMessageRoutes.get('/', async (c) => {
   requirePermission(c, 'customers.view');
-  const q = readQuery(c, z.object({ status: z.enum(['new', 'open', 'closed']).optional() }));
-  let query = c.get('ctx').db.selectFrom('support_requests').selectAll().orderBy('created_at', 'desc').limit(300);
-  if (q.status) query = query.where('status', '=', q.status);
+  const q = readQuery(c, z.object({ status: z.enum(['new', 'open', 'closed']).optional(), sandbox: z.enum(['exclude', 'only']).default('exclude') }));
+  let query = c
+    .get('ctx')
+    .db.selectFrom('support_requests as r')
+    .leftJoin('staff_profiles as sp', 'sp.id', 'r.assigned_to')
+    .leftJoin('staff_profiles as ap', 'ap.user_id', 'r.acknowledged_by')
+    .leftJoin('concierge_conversations as cc', 'cc.id', 'r.conversation_id')
+    .selectAll('r')
+    .select(['sp.display_name as assigned_name', 'ap.display_name as acknowledged_by_name', 'cc.reference as conversation_reference', 'cc.channel as conversation_channel'])
+    .where('r.sandbox', '=', q.sandbox === 'only')
+    .orderBy(sql`CASE r.priority WHEN 'urgent' THEN 0 WHEN 'high' THEN 1 ELSE 2 END`)
+    .orderBy('r.created_at', 'desc')
+    .limit(300);
+  if (q.status) query = query.where('r.status', '=', q.status);
   return c.json({ messages: await query.execute() });
+});
+
+adminMessageRoutes.post('/:id/acknowledge', async (c) => {
+  requirePermission(c, 'customers.manage');
+  const ok = await acknowledgeTicket(c.get('ctx'), c.req.param('id'), staffActor(c));
+  return c.json({ ok });
 });
 
 adminMessageRoutes.patch('/:id', async (c) => {
   requirePermission(c, 'customers.manage');
-  const body = await readJson(c, z.object({ status: z.enum(['new', 'open', 'closed']).optional(), assigned_to: z.string().uuid().nullable().optional() }));
-  await c.get('ctx').db.updateTable('support_requests').set(body).where('id', '=', c.req.param('id')).execute();
+  const body = await readJson(c, z.object({ status: z.enum(['new', 'open', 'closed']).optional(), assigned_to: z.string().uuid().nullable().optional(), priority: z.enum(['low', 'normal', 'high', 'urgent']).optional() }));
+  const ctx = c.get('ctx');
+  await ctx.db.updateTable('support_requests').set({ ...body, updated_at: sql`now()` }).where('id', '=', c.req.param('id')).execute();
+  await audit(ctx.db, staffActor(c), 'support.update', { type: 'support', id: c.req.param('id') }, body);
   return c.json({ ok: true });
 });

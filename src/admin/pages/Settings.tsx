@@ -5,7 +5,7 @@ import { useSession } from '../session';
 import { Badge, Btn, Card, Checkbox, Field, Input, Loader, PageHeader, Select, Textarea, useAction, useLoad } from '../ui';
 import { cn } from '../../lib/cn';
 
-type FieldSpec = { key: string; label: string; type: 'bool' | 'number' | 'nullable_number' | 'text' | 'nullable_text' | 'time' | 'nullable_time' | 'textarea' | 'money' | 'list' | 'select' | 'rates'; hint?: string; options?: Array<{ value: string; label: string }> };
+type FieldSpec = { key: string; label: string; type: 'bool' | 'number' | 'nullable_number' | 'text' | 'nullable_text' | 'time' | 'nullable_time' | 'textarea' | 'money' | 'list' | 'select' | 'rates' | 'routes'; hint?: string; options?: Array<{ value: string; label: string }> };
 
 const GROUPS: Array<{ key: string; label: string; intro?: string; needsApproval?: boolean; fields: FieldSpec[] }> = [
   {
@@ -137,6 +137,36 @@ const GROUPS: Array<{ key: string; label: string; intro?: string; needsApproval?
     ],
   },
   {
+    key: 'concierge', label: 'Flora', intro: 'Flora, the AI concierge on the website and the phone. She stays off until a channel is switched on and a monthly limit is set. Costs are estimates: the providers bill the real amounts.',
+    fields: [
+      { key: 'chat_enabled', label: 'Answer website chats', type: 'bool' },
+      { key: 'voice_enabled', label: 'Answer the phone line', type: 'bool', hint: 'The phone number and its credentials are set up by your developer. See the System page for whether the line is configured.' },
+      { key: 'chat_mode', label: 'The website chat works with', type: 'select', options: [{ value: 'demo', label: 'The demonstration sandbox (fictional data only)' }, { value: 'customer', label: 'The real business' }] },
+      { key: 'voice_mode', label: 'The phone line works with', type: 'select', options: [{ value: 'demo', label: 'The demonstration sandbox (fictional data only)' }, { value: 'customer', label: 'The real business' }] },
+      { key: 'monthly_budget_cents', label: 'Monthly spending limit, in dollars', type: 'money', hint: 'Once the estimated spend reaches this, Flora stops taking new chats and calls until next month.' },
+      { key: 'assistant_name', label: 'Name', type: 'text' },
+      { key: 'assistant_title', label: 'Title', type: 'text' },
+      { key: 'chat_greeting', label: 'Chat greeting', type: 'textarea', hint: 'Keep saying that Flora is an automated assistant.' },
+      { key: 'voice_greeting', label: 'Phone greeting', type: 'textarea', hint: 'Keep saying that Flora is automated and that calls are transcribed.' },
+      { key: 'max_call_minutes', label: 'Longest call, in minutes', type: 'number' },
+      { key: 'max_calls_per_number_per_day', label: 'Calls a number can make per day', type: 'number' },
+      { key: 'max_concurrent_calls', label: 'Calls at the same time', type: 'number' },
+      { key: 'max_messages_per_chat', label: 'Messages per chat', type: 'number' },
+      { key: 'max_chats_per_visitor_per_hour', label: 'New chats per visitor per hour', type: 'number' },
+      { key: 'texts_per_conversation', label: 'Texts Flora may send per call', type: 'number', hint: 'Only to the caller, only after they agree, and only once texting is registered.' },
+      { key: 'store_transcripts', label: 'Keep transcripts of what people said', type: 'bool' },
+      { key: 'transcript_retention_days', label: 'Delete transcripts after, in days', type: 'number' },
+      { key: 'routing', label: 'Who hears about requests', type: 'routes', hint: 'One per line, as kind = roles. Kinds: wedding, order, delivery, general, complaint. Routine questions Flora can answer reach nobody.' },
+      { key: 'escalate_urgent_minutes', label: 'Escalate an unacknowledged urgent request after, in minutes', type: 'number' },
+      { key: 'escalate_high_minutes', label: 'Escalate an unacknowledged time-sensitive request after, in minutes', type: 'number' },
+      { key: 'escalation_roles', label: 'Escalate to these roles', type: 'list' },
+      { key: 'chat_model', label: 'Chat model', type: 'text' },
+      { key: 'voice_model', label: 'Phone model', type: 'text' },
+      { key: 'voice', label: 'Phone voice', type: 'text' },
+      { key: 'transcription_model', label: 'Transcription model', type: 'text' },
+    ],
+  },
+  {
     key: 'followups', label: 'Follow-ups',
     fields: [
       { key: 'enabled', label: 'Send a thank-you note after orders', type: 'bool', hint: 'Only to customers who opted in to marketing email. Also switch on the rule under Messages & rules.' },
@@ -165,6 +195,7 @@ const toForm = (spec: FieldSpec, v: unknown): string | boolean => {
     case 'money': return v === null || v === undefined ? '' : ((v as number) / 100).toFixed(2);
     case 'list': return Array.isArray(v) ? v.join(', ') : '';
     case 'rates': return Object.entries((v as Record<string, number>) ?? {}).map(([k, bps]) => `${k} = ${bps / 100}`).join('\n');
+    case 'routes': return Object.entries((v as Record<string, string[]>) ?? {}).map(([k, roles]) => `${k} = ${roles.join(', ')}`).join('\n');
     default: return v === null || v === undefined ? '' : String(v);
   }
 };
@@ -179,6 +210,7 @@ const fromForm = (spec: FieldSpec, v: string | boolean): unknown => {
     case 'nullable_text': case 'nullable_time': case 'textarea': return s === '' ? null : s;
     case 'list': return String(s).split(',').map((x) => x.trim()).filter(Boolean);
     case 'rates': return Object.fromEntries(String(s).split('\n').map((l) => l.split('=').map((x) => x.trim())).filter((p) => p.length === 2 && p[0]).map(([k, val]) => [k, Math.round(Number(val) * 100)]));
+    case 'routes': return Object.fromEntries(String(s).split('\n').map((l) => l.split('=').map((x) => x.trim())).filter((p) => p.length === 2 && p[0]).map(([k, roles]) => [k, roles.split(',').map((r) => r.trim()).filter(Boolean)]));
     default: return s;
   }
 };
@@ -213,7 +245,7 @@ function GroupForm({ group, values, approved, onSaved }: { group: (typeof GROUPS
           const value = form[f.key];
           if (f.type === 'bool') return <div key={f.key} className="sm:col-span-2"><Checkbox label={f.label} hint={f.hint} checked={Boolean(value)} onChange={(v) => field(f.key, v)} /></div>;
           if (f.type === 'select') return <Field key={f.key} label={f.label} hint={f.hint}><Select value={String(value ?? '')} onChange={(e) => field(f.key, e.target.value)}>{f.options?.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}</Select></Field>;
-          if (f.type === 'textarea' || f.type === 'rates') return <Field key={f.key} label={f.label} hint={f.hint} className="sm:col-span-2"><Textarea rows={f.key.endsWith('text') || f.key === 'cancellation_policy' ? 8 : 3} value={String(value ?? '')} onChange={(e) => field(f.key, e.target.value)} /></Field>;
+          if (f.type === 'textarea' || f.type === 'rates' || f.type === 'routes') return <Field key={f.key} label={f.label} hint={f.hint} className="sm:col-span-2"><Textarea rows={f.key.endsWith('text') || f.key === 'cancellation_policy' ? 8 : 3} value={String(value ?? '')} onChange={(e) => field(f.key, e.target.value)} /></Field>;
           if (f.type === 'list') return <Field key={f.key} label={f.label} hint={f.hint ?? 'Separate with commas.'} className="sm:col-span-2"><Input value={String(value ?? '')} onChange={(e) => field(f.key, e.target.value)} /></Field>;
           const isTime = f.type === 'time' || f.type === 'nullable_time';
           const numeric = f.type === 'number' || f.type === 'nullable_number';

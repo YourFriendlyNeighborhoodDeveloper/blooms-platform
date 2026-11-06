@@ -7,6 +7,7 @@ import { reconcileOpenPayments } from '../modules/payments/service.js';
 import { getSetting } from '../modules/settings/service.js';
 import { checkLowStock } from '../modules/inventory/service.js';
 import { LIFECYCLE_SWEEPS } from './lifecycle.js';
+import { CONCIERGE_SWEEPS } from '../modules/concierge/sweeps.js';
 
 export type Sweep = { name: string; everyMinutes: number; run: (ctx: AppContext) => Promise<unknown> };
 
@@ -102,4 +103,4 @@ const SYSTEM_SWEEPS: Sweep[] = [
   },
 ];
 
-export const SWEEPS: Sweep[] = [...COMMERCE_SWEEPS, ...LIFECYCLE_SWEEPS, ...SYSTEM_SWEEPS];
+export const SWEEPS: Sweep[] = [...COMMERCE_SWEEPS, ...LIFECYCLE_SWEEPS, ...SYSTEM_SWEEPS, ...CONCIERGE_SWEEPS];

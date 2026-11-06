@@ -10,7 +10,8 @@ Say this early, and keep to it:
 
 - **Real:** the website, the shop rules, the database, the order and wedding workflows, the dashboard, the automation, and the tracking pages.
 - **Simulated:** payments (a clearly marked stand-in for Stripe's page, so no money moves), and email (captured in a test mailbox, never delivered).
-- **Not running:** text messages, which need a Twilio account and carrier registration.
+- **Not running:** text messages, which need carrier registration (A2P 10DLC) in the business's name.
+- **Flora:** a real AI model when the deployment's OpenAI key has credits. She works only with the demonstration's fictional data and never pretends to be a person.
 - **Fictional:** every product, price, customer, team member and wedding.
 - **Not Blooms' live website.** It is a demonstration by Abraxas Technologies.
 
@@ -85,7 +86,29 @@ Say this early, and keep to it:
 4. **Set up your shop:** the guided list for her real setup.
 5. Optional, the fully booked date again. Under **Team → Event crews**, add a crew. Under **Settings → Weddings & events**, set **Most events in a day** to 3 and **People per crew** to 1. The date check now opens. Change both back afterwards.
 
-### Close
+### Part 7: Flora, the AI concierge (2 to 3 minutes, optional)
+
+Flora needs the deployment's own OpenAI key with credits. On the phone line she also needs the number
+attached (`scripts/staging.sh flora-line`, after `publish`). Check **Dashboard → Flora** first: both
+channels should say **Answering**. If either does not, skip that part rather than improvise.
+
+1. **Chat, on the phone browser.** Tap **Ask Flora**, then **Plan my wedding**. Give a date, a venue,
+   guests and colors. Point out that she says she is an automated assistant and that this is a
+   demonstration. She checks the date and offers **Review and send my plan**.
+2. **The review page.** Everything she saved is filled in. Change one thing, then send it. It lands
+   in the sandbox, not the pipeline: show **Dashboard → Flora → Sandbox**, then open the conversation
+   to show each lookup she made.
+3. **The phone, if attached.** Call the number from the presenter's own verified phone. Plan a
+   wedding the same way. When she offers a text, say yes. On this demonstration line she reads a
+   six-digit code instead, because texting needs carrier registration. Open **Continue a call** on
+   the website, enter the code and the last four digits of your phone, and the plan from the call
+   appears.
+4. **Safety, in one line.** Ask her to refund an order, or for someone else's order. She declines and
+   offers to pass the request to a person.
+
+Never call or text Samantha, her staff or customers from the demonstration line.
+
+### Close### Close
 
 Point to [owner-onboarding.md](owner-onboarding.md) for what the business would provide, and
 [launch-checklist.md](launch-checklist.md) for what happens before real customers.

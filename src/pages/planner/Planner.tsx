@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { useNavigate } from 'react-router';
 import { api, ApiError, newIdempotencyKey } from '../../lib/api';
 import { dateLabel, money } from '../../lib/format';
@@ -40,19 +40,22 @@ const EMPTY: Draft = { name: '', email: '', phone: '', event_type: 'Wedding', ev
 const STORAGE_KEY = 'blooms-planner-draft';
 const STEPS = ['Your event', 'Your style', 'Flowers & décor', 'Budget', 'Your date', 'Send'];
 
-function loadDraft(): Draft {
+export type PlannerDraft = Draft;
+
+function loadDraft(key: string, initial?: Partial<Draft>): Draft {
+  const start = { ...EMPTY, ...(initial ?? {}) };
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(key);
     // Consent is never restored from a saved draft. It must be given freshly each time.
-    return raw ? { ...EMPTY, ...JSON.parse(raw), sms_transactional: false, sms_marketing: false, email_marketing: false } : EMPTY;
+    return raw ? { ...start, ...JSON.parse(raw), sms_transactional: false, sms_marketing: false, email_marketing: false } : start;
   } catch {
-    return EMPTY;
+    return start;
   }
 }
 
-function saveDraft(d: Draft) {
+function saveDraft(key: string, d: Draft) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
+    localStorage.setItem(key, JSON.stringify(d));
   } catch {
     /* A saved draft is a convenience. The planner works without it. */
   }
@@ -91,12 +94,32 @@ function ChoiceCard({ title, description, image, hint, quantity, max, onChange }
   );
 }
 
+export type PlannerSubmitResult = { reference: string; portal_token?: string; sandbox?: boolean };
+
+type PlannerFormProps = {
+  /** Answers gathered elsewhere, such as by Flora, to start from. */
+  initial?: Partial<Draft>;
+  /** Where the plan is sent. The website planner and a Flora draft share everything else. */
+  submitPath?: string;
+  storageKey?: string;
+  startStep?: number;
+  banner?: ReactNode;
+  eyebrow?: string;
+  title?: string;
+  intro?: string;
+  onSubmitted?: (res: PlannerSubmitResult) => void;
+};
+
 export default function Planner() {
+  return <PlannerForm />;
+}
+
+export function PlannerForm({ initial, submitPath = '/api/public/planner/submit', storageKey = STORAGE_KEY, startStep = 0, banner, eyebrow = 'Wedding & event planner', title = 'Plan your event, whenever you are ready', intro = 'Share your date, your style and your wish list. See a first estimate, check your date and book a consultation. There is no obligation, and your answers save as you go.', onSubmitted }: PlannerFormProps) {
   const navigate = useNavigate();
   const [options, setOptions] = useState<Options | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [step, setStep] = useState(0);
-  const [draft, setDraft] = useState<Draft>(loadDraft);
+  const [step, setStep] = useState(startStep);
+  const [draft, setDraft] = useState<Draft>(() => loadDraft(storageKey, initial));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [estimate, setEstimate] = useState<Estimate | null>(null);
   const [availability, setAvailability] = useState<Availability | null>(null);
@@ -112,7 +135,7 @@ export default function Planner() {
     api<Options>('/api/public/planner/options').then(setOptions).catch((err) => setLoadError(err instanceof ApiError ? err.message : 'We could not load the planner.'));
   }, []);
 
-  useEffect(() => saveDraft(draft), [draft]);
+  useEffect(() => saveDraft(storageKey, draft), [storageKey, draft]);
 
   const set = <K extends keyof Draft>(key: K, value: Draft[K]) => {
     setDraft((d) => ({ ...d, [key]: value }));
@@ -198,10 +221,13 @@ export default function Planner() {
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
+    // Only the last step sends. Anything else that submits the form, such as Enter, moves on instead.
+    if (step < STEPS.length - 1) return go(step + 1);
+    if (submitting) return;
     setSubmitError(null);
     setSubmitting(true);
     try {
-      const res = await api<{ reference: string; portal_token: string }>('/api/public/planner/submit', {
+      const res = await api<PlannerSubmitResult>(submitPath, {
         body: {
           idempotency_key: idempotency.current,
           contact: { name: draft.name.trim(), email: draft.email.trim(), phone: draft.phone.trim() || null },
@@ -221,11 +247,12 @@ export default function Planner() {
         },
       });
       try {
-        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(storageKey);
       } catch {
         /* Nothing to clean up. */
       }
-      navigate(`/plan/${res.portal_token}?new=1`);
+      if (onSubmitted) onSubmitted(res);
+      else navigate(`/plan/${res.portal_token}?new=1`);
     } catch (err) {
       const apiErr = err instanceof ApiError ? err : null;
       setSubmitError(apiErr?.message ?? 'We could not send that. Please try again. Your answers are saved here.');
@@ -237,14 +264,14 @@ export default function Planner() {
 
   if (loadError) {
     return (
-      <StorePage title="Plan your event" narrow>
+      <StorePage title={title} narrow>
         <Notice tone="error">{loadError}</Notice>
       </StorePage>
     );
   }
   if (!options) {
     return (
-      <StorePage title="Plan your event" narrow>
+      <StorePage title={title} narrow>
         <Spinner />
       </StorePage>
     );
@@ -253,8 +280,9 @@ export default function Planner() {
   const hasCatalog = options.categories.length > 0 || options.rentals.length > 0;
 
   return (
-    <StorePage eyebrow="Wedding & event planner" title="Plan your event, whenever you are ready" intro="Share your date, your style and your wish list. See a first estimate, check your date and book a consultation. There is no obligation, and your answers save as you go.">
+    <StorePage eyebrow={eyebrow} title={title} intro={intro}>
       <TestModeBanner />
+      {banner}
       <div ref={top} tabIndex={-1} className="scroll-mt-28 outline-none">
         <ol className="mb-8 flex flex-wrap gap-x-5 gap-y-2" aria-label="Planner steps">
           {STEPS.map((label, i) => (
@@ -471,12 +499,13 @@ export default function Planner() {
             ) : (
               <span />
             )}
+            {/* Distinct keys: reusing one <button> and switching its type to submit mid-click makes the browser send the form a step early. */}
             {step < STEPS.length - 1 ? (
-              <Button onClick={() => go(step + 1)} size="lg" icon={<Arrow />}>
+              <Button key="continue" onClick={() => go(step + 1)} size="lg" icon={<Arrow />}>
                 Continue
               </Button>
             ) : (
-              <Button type="submit" size="lg" icon={<Arrow />}>
+              <Button key="send" type="submit" size="lg" icon={<Arrow />}>
                 {submitting ? 'Sending…' : 'Send my plan'}
               </Button>
             )}

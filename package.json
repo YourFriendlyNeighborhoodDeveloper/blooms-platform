@@ -46,6 +46,7 @@
     "luxon": "^3.7.2",
     "motion": "^12.43.0",
     "nodemailer": "^10.3.1",
+    "openai": "7.40.0",
     "pg": "^8.23.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
@@ -53,6 +54,7 @@
     "sharp": "^0.35.5",
     "stripe": "^23.1.0",
     "twilio": "^6.2.0",
+    "ws": "8.22.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {
@@ -66,6 +68,7 @@
     "@types/pg": "^8.23.1",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@types/ws": "8.18.1",
     "@vitejs/plugin-react": "^5.2.0",
     "concurrently": "^10.0.6",
     "esbuild": "^0.28.2",

@@ -14,6 +14,7 @@ import { notFoundMeta, pages, type PageMeta } from './data/seo';
 import Home from './pages/Home';
 import { PLATFORM_ENABLED, PlatformProvider } from './lib/platform';
 import { CartProvider } from './shop/CartContext';
+import { FloraChat } from './components/concierge/FloraChat';
 
 const loaders = {
   '/flowers': () => import('./pages/Flowers'),
@@ -42,7 +43,9 @@ const platformRoutes: Array<{ path: string; meta: PageMeta; Page: LazyExoticComp
       { path: '/track', meta: privateMeta('/track', 'Order status'), Page: lazy(() => import('./pages/shop/Track').then((m) => ({ default: m.TrackLookup }))) },
       { path: '/track/:token', meta: privateMeta('/track', 'Order status'), Page: lazy(() => import('./pages/shop/Track')) },
       { path: '/plan', meta: metaFor('/plan'), Page: lazy(() => import('./pages/planner/Planner')) },
+      { path: '/plan/draft/:token', meta: privateMeta('/plan', 'Review your plan'), Page: lazy(() => import('./pages/planner/DraftReview')) },
       { path: '/plan/:token', meta: privateMeta('/plan', 'Your plan'), Page: lazy(() => import('./pages/planner/InquiryPortal')) },
+      { path: '/continue', meta: privateMeta('/continue', 'Continue a call'), Page: lazy(() => import('./pages/planner/ContinueCall')) },
       { path: '/quote/:token', meta: privateMeta('/quote', 'Your quote'), Page: lazy(() => import('./pages/planner/QuotePage')) },
       { path: '/pay/:token', meta: privateMeta('/pay', 'Payment'), Page: lazy(() => import('./pages/planner/PayInvoice')) },
       { path: '/project/:token', meta: privateMeta('/project', 'Your event'), Page: lazy(() => import('./pages/planner/ProjectPortal')) },
@@ -184,6 +187,7 @@ function Chrome() {
       </main>
       <Footer />
       <ConceptBadge />
+      {PLATFORM_ENABLED && <FloraChat />}
       <HashScroller />
       <RouteFocus />
       <Prefetch />

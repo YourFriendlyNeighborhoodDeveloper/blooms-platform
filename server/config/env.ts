@@ -49,6 +49,14 @@ const schema = z.object({
   TWILIO_MESSAGING_SERVICE_SID: optional,
   TWILIO_A2P_APPROVED: flag(),
 
+  // Flora, the AI concierge. off: no assistant. mock: a scripted stand-in for development and tests.
+  // openai: the OpenAI API, with this deployment's own key.
+  AI_PROVIDER: z.enum(['off', 'mock', 'openai']).default('off'),
+  OPENAI_API_KEY: optional,
+  // Flora answers this Twilio number. Voice needs the Twilio account credentials above, not A2P.
+  VOICE_ENABLED: flag(),
+  TWILIO_VOICE_NUMBER: optional,
+
   STORAGE_PROVIDER: z.enum(['local', 's3']).default('local'),
   STORAGE_LOCAL_DIR: z.string().default('storage'),
   S3_ENDPOINT: optional,
@@ -74,6 +82,10 @@ export type Env = RawEnv & {
   livePayments: boolean;
   /** Addresses and numbers that non-production environments may contact. */
   messageAllowlist: string[];
+  /** The assistant provider actually in use, after checking its configuration. */
+  aiProvider: 'off' | 'mock' | 'openai';
+  /** Flora answers the phone only when this is true. */
+  voiceEnabled: boolean;
   warnings: string[];
 };
 
@@ -165,6 +177,32 @@ export function loadEnv(source: Record<string, string | undefined> = process.env
     smsEnabled = false;
   }
 
+  let aiProvider = raw.AI_PROVIDER;
+  if (aiProvider === 'mock' && isProduction) errors.push('AI_PROVIDER=mock is not allowed in production.');
+  if (aiProvider === 'openai' && !raw.OPENAI_API_KEY) {
+    warnings.push('AI_PROVIDER=openai but OPENAI_API_KEY is not set; Flora is off.');
+    aiProvider = 'off';
+  }
+  if (raw.OPENAI_API_KEY && !/^sk-[A-Za-z0-9_-]{20,}$/.test(raw.OPENAI_API_KEY)) {
+    errors.push('OPENAI_API_KEY does not look like an OpenAI API key.');
+  }
+
+  let voiceEnabled = raw.VOICE_ENABLED;
+  const voiceNumber = raw.TWILIO_VOICE_NUMBER;
+  if (voiceEnabled && !(raw.TWILIO_ACCOUNT_SID && raw.TWILIO_AUTH_TOKEN && voiceNumber)) {
+    warnings.push('VOICE_ENABLED is true but TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN or TWILIO_VOICE_NUMBER is missing; the phone line is off.');
+    voiceEnabled = false;
+  }
+  if (voiceNumber && !/^\+1\d{10}$/.test(voiceNumber)) errors.push('TWILIO_VOICE_NUMBER must be a US number in E.164 form, such as +19895550100.');
+  if (voiceEnabled && aiProvider !== 'openai') {
+    warnings.push('VOICE_ENABLED is true but no AI provider is configured; the phone line is off.');
+    voiceEnabled = false;
+  }
+  if (voiceEnabled && !raw.PUBLIC_BASE_URL.startsWith('https://')) {
+    warnings.push('The phone line needs PUBLIC_BASE_URL to be a public https address Twilio can reach; it is off.');
+    voiceEnabled = false;
+  }
+
   if (raw.STORAGE_PROVIDER === 's3' && !(raw.S3_ENDPOINT && raw.S3_BUCKET && raw.S3_ACCESS_KEY_ID && raw.S3_SECRET_ACCESS_KEY)) {
     errors.push('STORAGE_PROVIDER=s3 requires S3_ENDPOINT, S3_BUCKET, S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY.');
   }
@@ -174,6 +212,8 @@ export function loadEnv(source: Record<string, string | undefined> = process.env
   return {
     ...raw,
     SMS_ENABLED: smsEnabled,
+    aiProvider,
+    voiceEnabled,
     DATABASE_URL: databaseUrl,
     SESSION_SECRET: sessionSecret,
     isProduction,

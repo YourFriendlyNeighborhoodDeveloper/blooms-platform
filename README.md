@@ -20,7 +20,13 @@ and consultation booking; quotes, deposits and balances; and a passwordless cust
 the wedding pipeline, inventory with recipes and purchasing, rentals, customers, reports, message
 templates, and every business rule. Roles limit what each person sees.
 
-**Behind the scenes.** A capacity engine that weighs staff hours, workload, crews, rentals, delivery
+**Flora, the AI concierge.** An automated assistant on the website chat and, optionally, a phone
+line. She plans weddings with customers, checks dates and prices against the real system, saves a
+plan the customer reviews and sends on the website, and passes anything she cannot do to a person.
+She has a demonstration sandbox, a monthly spending limit, and a full transcript in the dashboard. See
+[docs/flora.md](docs/flora.md).
+
+**Behind the scenes.****Behind the scenes.** A capacity engine that weighs staff hours, workload, crews, rentals, delivery
 windows and closures. The database enforces no overselling and no double booking. Background jobs
 send messages, remind, reconcile payments and recover after restarts.
 
@@ -31,7 +37,7 @@ and still needed.
 
 React 19, TypeScript, Vite 7, Tailwind CSS 4, Motion 12 and React Router 7 for the site and dashboard.
 Node with Hono, PostgreSQL 17 with Kysely, and Zod on the server. Stripe, Resend or SMTP, Twilio
-(optional), and any S3-compatible storage as integrations. Vitest and Playwright for tests. Fonts are
+(optional), the OpenAI API for Flora (optional), and any S3-compatible storage as integrations. Vitest and Playwright for tests. Fonts are
 self-hosted (Fraunces and Instrument Sans, both SIL OFL).
 
 ## Getting started
@@ -75,6 +81,7 @@ Payments are simulated locally (`PAYMENTS_MODE=mock`), and email is recorded rat
 | [Administrator guide](docs/admin-guide.md) and [staff guide](docs/staff-guide.md) | Using the dashboard |
 | [Business settings](docs/business-settings.md) | Every rule and its default |
 | [Operations](docs/operations.md) | Deploying, monitoring, backups, restores and rollback |
+| [Flora, the AI concierge](docs/flora.md) | How the chat and phone assistant works, its safety rules, setup and costs |
 | [Integrations](docs/integrations.md) | Stripe, email, Twilio, Facebook, Google Calendar and storage |
 | [Services and costs](docs/costs-and-services.md) | Every outside service and what it costs |
 | [Testing](docs/testing.md) | Test layers, and what is mocked versus verified |

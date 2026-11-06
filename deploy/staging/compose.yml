@@ -69,6 +69,7 @@ services:
       - '127.0.0.1:8443:443'
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./gate.caddy:/etc/caddy/gate.caddy:ro
       - caddy_data:/data
     depends_on:
       - web

@@ -6,8 +6,18 @@ const ownerPassword = () => {
   return value;
 };
 
-export async function openPage(browser: Browser, opts: { phone?: boolean } = {}) {
-  const context = await browser.newContext(opts.phone ? { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } : {});
+/** The proxy's team gate in front of /admin, /api/admin and /mailbox. It uses the mailbox sign-in. */
+export const gateCredentials = () => {
+  const auth = process.env.STAGING_MAILBOX_AUTH;
+  if (!auth) throw new Error('Set STAGING_MAILBOX_AUTH, or run scripts/staging.sh verify.');
+  return { username: auth.slice(0, auth.indexOf(':')), password: auth.slice(auth.indexOf(':') + 1) };
+};
+
+export async function openPage(browser: Browser, opts: { phone?: boolean; team?: boolean } = {}) {
+  const context = await browser.newContext({
+    ...(opts.phone ? { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } : {}),
+    ...(opts.team ? { httpCredentials: gateCredentials() } : {}),
+  });
   const page = await context.newPage();
   await page.addInitScript(() => {
     try {
@@ -20,7 +30,7 @@ export async function openPage(browser: Browser, opts: { phone?: boolean } = {})
 }
 
 export async function signIn(browser: Browser, email = 'owner@demo.example') {
-  const page = await openPage(browser);
+  const page = await openPage(browser, { team: true });
   await page.goto('/admin');
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(ownerPassword());

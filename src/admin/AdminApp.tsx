@@ -39,6 +39,8 @@ const extra = {
   Setup: lazy(() => import('./pages/Setup')),
   Onboarding: lazy(() => import('./pages/Onboarding')),
   Account: lazy(() => import('./pages/MyAccount')),
+  Concierge: lazy(() => import('./pages/Concierge')),
+  ConciergeConversation: lazy(() => import('./pages/ConciergeConversation')),
 };
 
 type NavItem = { to: string; label: string; permission?: string; end?: boolean };
@@ -64,6 +66,7 @@ const NAV: Array<{ heading: string; items: NavItem[] }> = [
   { heading: 'People', items: [
     { to: '/admin/customers', label: 'Customers', permission: 'customers.view' },
     { to: '/admin/messages', label: 'Messages', permission: 'customers.view' },
+    { to: '/admin/flora', label: 'Flora', permission: 'concierge.view' },
     { to: '/admin/team', label: 'Team', permission: 'staff.view' },
   ] },
   { heading: 'Business', items: [
@@ -266,6 +269,8 @@ function Shell() {
                 <Route path="customers/messages/:id" element={<extra.Messages />} />
                 <Route path="customers/:id" element={<extra.CustomerDetail />} />
                 <Route path="messages" element={<extra.Messages />} />
+                <Route path="flora" element={<extra.Concierge />} />
+                <Route path="flora/conversations/:id" element={<extra.ConciergeConversation />} />
                 <Route path="team" element={<extra.Staff />} />
                 <Route path="reports" element={<extra.Reports />} />
                 <Route path="marketing" element={<extra.Marketing />} />

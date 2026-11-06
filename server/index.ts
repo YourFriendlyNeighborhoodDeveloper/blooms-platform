@@ -6,6 +6,7 @@ import { createApp } from './app.js';
 import { migrate } from './db/migrate.js';
 import { seedBase } from './db/seed-base.js';
 import { startWorker, type RunningWorker } from './automation/worker.js';
+import { attachVoiceMedia } from './modules/concierge/voice.js';
 
 const env = loadEnv();
 await migrate(env.DATABASE_URL, { ssl: env.DATABASE_SSL });
@@ -15,8 +16,11 @@ for (const warning of env.warnings) ctx.log.warn(warning);
 
 const app = createApp(ctx);
 const server = serve({ fetch: app.fetch, port: env.PORT, hostname: env.isDeployed ? '0.0.0.0' : '127.0.0.1' }, (info) => {
-  ctx.log.info('web server listening', { port: info.port, env: env.APP_ENV, payments: ctx.payments.name, livemode: ctx.payments.livemode, email: ctx.email.name, sms: ctx.sms.enabled });
+  ctx.log.info('web server listening', { port: info.port, env: env.APP_ENV, payments: ctx.payments.name, livemode: ctx.payments.livemode, email: ctx.email.name, sms: ctx.sms.enabled, assistant: ctx.ai.name, voice: ctx.voice.enabled });
 });
+
+// Twilio's call audio arrives as a WebSocket on the same port. Only that one path is accepted.
+attachVoiceMedia(server as unknown as import('node:http').Server, ctx);
 
 let worker: RunningWorker | null = null;
 if (env.WORKER_EMBEDDED) worker = startWorker(ctx);

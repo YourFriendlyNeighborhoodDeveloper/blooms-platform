@@ -170,6 +170,14 @@ export async function seedDemo(db: Db, opts: { log: (m: string) => void; passwor
   await updateSetting(db, 'events', { max_events_per_day: 2, min_notice_days: 60, deposit_percent: 25, staff_per_crew: 2, requires_contract: false, cancellation_policy: 'Demo policy. Example wording only: deposits hold your date and are not refundable.' }, actor);
   await updateSetting(db, 'privacy', { policy_text: 'Demo privacy policy. This placeholder is not legal text. A lawyer should write the real one.', terms_text: 'Demo terms of sale. This placeholder is not legal text. A lawyer should write the real one.' }, actor);
   await updateSetting(db, 'followups', { enabled: false, abandoned_cart_enabled: false }, actor);
+  // Flora in demonstration mode: fictional sandbox only, and a small monthly budget for the demo.
+  await updateSetting(db, 'concierge', { chat_enabled: true, voice_enabled: true, chat_mode: 'demo', voice_mode: 'demo', monthly_budget_cents: 1500 }, actor);
+  const knowledge = [
+    { title: 'Do you deliver to hospitals? (demo)', body: 'Demo answer, example wording only: we deliver to most local hospitals. Some units do not allow flowers, so we check with the hospital first.', keywords: 'hospital delivery patient room' },
+    { title: 'Can I bring my own vases? (demo)', body: 'Demo answer, example wording only: yes, bring them to the shop when you order, and we will use them for your arrangement.', keywords: 'vase vases bring own containers' },
+    { title: 'How far ahead should I book wedding flowers? (demo)', body: 'Demo answer, example wording only: most couples book three to nine months ahead. Popular Saturdays in June and September fill first.', keywords: 'wedding book ahead how early lead time' },
+  ];
+  for (const k of knowledge) await db.insertInto('concierge_knowledge').values({ ...k, published: true, is_demo: true }).execute();
   for (const group of ['ordering', 'delivery', 'tax', 'refunds'] as const) await setApproval(db, group, true, actor);
 
   for (let weekday = 0; weekday < 7; weekday++) {

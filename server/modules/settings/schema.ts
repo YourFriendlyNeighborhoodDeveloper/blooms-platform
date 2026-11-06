@@ -125,6 +125,43 @@ export const settingsSchemas = {
     abandoned_cart_enabled: z.boolean().default(false),
     abandoned_cart_hours: z.number().int().min(1).max(168).default(4),
   }),
+  concierge: z.object({
+    // Off until the owner turns each channel on and sets a monthly budget.
+    chat_enabled: z.boolean().default(false),
+    voice_enabled: z.boolean().default(false),
+    assistant_name: z.string().trim().min(1).max(40).default('Flora'),
+    assistant_title: z.string().trim().max(80).default(`${business.shortName}' AI Concierge`),
+    chat_greeting: z
+      .string()
+      .max(500)
+      .default(`Hi! I'm Flora, the virtual assistant at ${business.name}. I'm an automated assistant, not a member of the team. I can help you find flowers, plan a wedding or event, or check on an order.`),
+    voice_greeting: z
+      .string()
+      .max(500)
+      .default(`Hi, thanks for calling ${business.name}. I'm Flora, the shop's automated assistant. This call is transcribed so the team can follow up. How can I help?`),
+    // demo: fictional sandbox records, no access to real customers. customer: the real business.
+    chat_mode: z.enum(['demo', 'customer']).default('demo'),
+    voice_mode: z.enum(['demo', 'customer']).default('demo'),
+    chat_model: z.string().trim().min(1).max(80).default('gpt-5.4-mini'),
+    voice_model: z.string().trim().min(1).max(80).default('gpt-realtime-2.1'),
+    voice: z.string().trim().min(1).max(40).default('marin'),
+    transcription_model: z.string().trim().min(1).max(80).default('gpt-4o-transcribe'),
+    // Estimated provider spend per calendar month, in cents. Zero keeps Flora off.
+    monthly_budget_cents: cents.default(0),
+    max_call_minutes: z.number().int().min(1).max(30).default(8),
+    max_calls_per_number_per_day: z.number().int().min(1).max(50).default(3),
+    max_concurrent_calls: z.number().int().min(1).max(10).default(2),
+    max_messages_per_chat: z.number().int().min(4).max(200).default(40),
+    max_chats_per_visitor_per_hour: z.number().int().min(1).max(100).default(6),
+    texts_per_conversation: z.number().int().min(0).max(3).default(1),
+    store_transcripts: z.boolean().default(true),
+    transcript_retention_days: z.number().int().min(1).max(730).default(90),
+    // Which team roles hear about each kind of request. Only requests that need a person are sent.
+    routing: z.record(z.string(), z.array(z.string())).default({ wedding: ['sales'], order: ['administrator'], delivery: ['administrator'], general: ['administrator'], complaint: ['owner'] }),
+    escalate_urgent_minutes: z.number().int().min(5).max(1440).default(30),
+    escalate_high_minutes: z.number().int().min(5).max(2880).default(120),
+    escalation_roles: z.array(z.string()).default(['owner']),
+  }),
   privacy: z.object({
     policy_text: z.string().max(20_000).nullable().default(null),
     terms_text: z.string().max(20_000).nullable().default(null),

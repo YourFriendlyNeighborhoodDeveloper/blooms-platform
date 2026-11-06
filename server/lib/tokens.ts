@@ -37,7 +37,9 @@ export type TokenPurpose =
   | 'project_access'
   | 'preferences'
   | 'calendar_feed'
-  | 'review_action';
+  | 'review_action'
+  | 'concierge_draft'
+  | 'voice_stream';
 
 export async function mintAccessToken(
   db: Db,

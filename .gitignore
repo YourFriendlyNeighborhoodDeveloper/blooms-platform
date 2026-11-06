@@ -22,3 +22,5 @@ backups
 *.key
 deploy/staging/access*
 deploy/staging/secrets*
+deploy/staging/gate*
+deploy/staging/flora*

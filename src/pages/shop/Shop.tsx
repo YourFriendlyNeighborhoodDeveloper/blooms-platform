@@ -70,7 +70,9 @@ export default function Shop() {
   const [search, setSearch] = useState(q);
 
   const setParam = (key: string, value: string) => {
-    const next = new URLSearchParams(params);
+    // Built from the address bar, not this render's params: the router applies changes as a
+    // transition, so a search typed right after a department click would otherwise undo the click.
+    const next = new URLSearchParams(window.location.search);
     if (value) next.set(key, value);
     else next.delete(key);
     if (key === 'division') next.delete('category');

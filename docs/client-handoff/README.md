@@ -43,6 +43,7 @@ and how it would be set up for real. It was prepared by Abraxas Technologies.
 | [notifications-setup.md](notifications-setup.md) | The owner | Email, and optional text messages |
 | [delivery-rules.md](delivery-rules.md) | The owner | Delivery areas, times, limits and closures |
 | [wedding-workflows.md](wedding-workflows.md) | The owner and coordinators | From inquiry to confirmed event |
+| [flora.md](flora.md) | The owner | Flora, the AI concierge on the website and phone: what she does, the controls, and costs |
 | [launch-checklist.md](launch-checklist.md) | Everyone | What must be true before real customers |
 | [operations-handoff.md](operations-handoff.md) | Whoever hosts it | Hosting, monitoring, backups, recovery, and keeping demo and real data apart |
 | [demonstration-guide.md](demonstration-guide.md) | The presenter | A 10 to 15 minute guided demonstration |

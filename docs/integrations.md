@@ -96,3 +96,13 @@ signed-in or token links. Images are re-encoded, which removes location data.
 
 - `STORAGE_PROVIDER=local` keeps files on disk. Use a persistent volume and back it up.
 - `STORAGE_PROVIDER=s3` works with any S3-compatible service, such as Cloudflare R2, Backblaze B2 or Amazon S3. Set `S3_ENDPOINT`, `S3_BUCKET`, `S3_REGION`, `S3_ACCESS_KEY_ID` and `S3_SECRET_ACCESS_KEY`. Keep the bucket private.
+
+## OpenAI and Twilio Voice (Flora)
+
+Flora, the AI concierge, uses the OpenAI API through its official Node SDK (`openai`). The website
+chat uses the Responses API. The phone uses the Realtime API, bridged to Twilio Media Streams. Both
+are off unless `AI_PROVIDER=openai` and `OPENAI_API_KEY` are set, a channel is switched on, and the
+owner has set a monthly limit. The phone line also needs `VOICE_ENABLED=true`, the Twilio account
+credentials, and `TWILIO_VOICE_NUMBER`. Every Twilio webhook is signature-checked. See
+[flora.md](flora.md) for the setup steps, the safety rules, costs, and what has been verified.
+

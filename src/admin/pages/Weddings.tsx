@@ -55,7 +55,9 @@ export default function Weddings() {
       <PageHeader title="Weddings & events" subtitle="Drag a card to change its stage, or use its menu." actions={can('settings.manage') && <Btn onClick={() => setAdding(true)}>Manage stages</Btn>} />
       <Loader state={state}>
         {(d) => (
-          <div className="-mx-4 overflow-x-auto px-4 pb-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+          // Focusable, so keyboard users can scroll the board even when no column has a card to tab to (WCAG 2.1.1).
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+          <div tabIndex={0} role="region" aria-label="Pipeline stages" className="-mx-4 overflow-x-auto px-4 pb-4 outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus)] sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
             <div className="flex min-w-max gap-3">
               {d.stages.map((stage) => {
                 const cards = d.cards.filter((c) => c.stage_id === stage.id);

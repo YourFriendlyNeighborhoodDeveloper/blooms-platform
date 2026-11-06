@@ -280,6 +280,23 @@ test.describe('Nothing private is exposed', () => {
     expect(await (await request.get('/robots.txt')).text()).toContain('Disallow: /');
   });
 
+  test('the team gate guards the dashboard and the mailbox, and leaves the shop open', async ({ request, browser }) => {
+    for (const path of ['/admin', '/admin/orders', '/api/admin/orders', '/api/admin/auth/me', '/mailbox/', '/mailbox/api/v1/messages']) {
+      const res = await request.get(path);
+      expect(res.status(), `${path} without the gate password`).toBe(401);
+      expect(res.headers()['www-authenticate'] ?? '', `${path} asks for the gate`).toContain('Basic');
+    }
+    const wrong = await request.get('/admin', { headers: { authorization: `Basic ${Buffer.from('demo:wrong-password').toString('base64')}` } });
+    expect(wrong.status()).toBe(401);
+    for (const path of ['/', '/shop', '/plan', '/track', '/api/public/config', '/readyz']) expect((await request.get(path)).status(), `${path} stays public`).toBe(200);
+
+    // Past the gate, the dashboard's own sign-in still applies.
+    const team = await openPage(browser, { team: true });
+    await team.goto('/admin');
+    await expect(team.getByRole('button', { name: 'Sign in' })).toBeVisible();
+    expect(await team.evaluate(async () => (await fetch('/api/admin/orders')).status)).toBe(401);
+  });
+
   test('after everything above, every record check still passes', async ({ browser }) => {
     const owner = await signIn(browser);
     const report = await api(owner, 'GET', '/api/admin/system/integrity');

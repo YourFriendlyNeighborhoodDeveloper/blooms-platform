@@ -49,10 +49,12 @@ test orders, which `scripts/staging.sh reset` removes. Credentials are passed in
 | Integration and database | `server/modules/weddings/weddings.test.ts` | Scenario C at 11:30 p.m.; Scenario D; crew and rental double booking under concurrent requests; consultation double booking; staff days off; holds that expire; deposits, balances and invoices; quote acceptance rules |
 | Integration and database | `server/modules/platform.test.ts` | SMS consent, STOP, START and HELP, quiet hours and the Twilio switch; customer accounts and private links; privacy export and erasure; safe uploads; Facebook links; launch checklist and safe defaults; templates; calendar and moves; inventory operations; reports; health; Google Calendar queueing; request limits; staff assignments; returns; record checks; client addresses behind proxies; idempotency key scope; reschedules; department closures; substitutes; role permissions |
 | Adapters | `server/integrations/adapters.contract.test.ts` | The real Stripe adapter's requests, checked against Stripe's published API definition; Stripe's webhook signing; real SMTP delivery and the non-production allowlist; private S3 storage with signed requests; Twilio webhook signatures and the A2P switch |
+| Integration and database | `server/modules/concierge/concierge.test.ts` | Flora: off by default, budgets, provider pause, chat with scripted model, tool scoping and refusals, prompt injection, identity check by code, demo isolation from real orders, sandbox plans never reaching the pipeline, customer-mode inquiries, conversion, ticket routing and escalation, Twilio signatures, one-time stream tokens, per-number limits, the phone bridge with stand-in sockets, consent before a text, the continue code, retention |
 | Browser | `e2e/scenarios.spec.ts` | Scenarios A to H, each through the real pages, in Chrome |
 | Browser | `e2e/platform.spec.ts` | Product discovery, cart, promotions, private tracking, passwordless sign-in, refunds, role restrictions, calendar, settings, Facebook failing safely, the order desk, owner setup, confirmed hours, and the original pages |
 | Browser | `e2e/a11y.spec.ts` | Automated WCAG 2.1 AA checks (axe) on checkout, every planner step, the shop, account, tracking, the inquiry forms and the dashboard; keyboard-only sign-in |
 | Browser | `e2e/mobile.spec.ts` | No sideways scrolling on 14 pages at phone width; buying, planning, and staff work on a phone |
+| Browser | `e2e/flora.spec.ts` | Flora's widget (with an accessibility check), a plan saved from chat, the review page prefilled and edited, sent to the sandbox, the dashboard's sandbox and transcript views, and the continue-a-call page |
 | Browser | `e2e/zz-integrity.spec.ts` | After every browser flow, all record checks still pass |
 
 Concurrency is tested directly: two customers race for the last unit, the last delivery stop, the
@@ -70,6 +72,8 @@ last daily capacity and the same event crew, and exactly one wins each time.
 | S3 storage | Real signed requests against an S3-compatible server | Yes, for the protocol. Not with the business's provider |
 | Google Calendar push | Queueing tested; the Google API call is not | **No.** Needs OAuth credentials |
 | Facebook embeds | Loading on request and failing safely, tested with Facebook blocked | Not with a real public video |
+| OpenAI (Flora) | Scripted stand-in in all tests | **Reached, not exercised.** The real key is valid. Inference was refused on 2026-11-05: the account has no credits |
+| Twilio Voice (Flora) | Real signature checks with Twilio's helper; stand-in sockets for the media stream | **No live call yet.** Needs a public address, the number attached, credits, and a verified caller on the trial account |
 | Hosting | Production compose file built and run locally; restart and worker recovery rehearsed; backup and restore rehearsed | Not deployed anywhere |
 
 ## Fixtures

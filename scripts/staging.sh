@@ -15,6 +15,11 @@
 #   scripts/staging.sh logs [svc]    follow logs
 #   scripts/staging.sh down          stop everything, keeping the data
 #
+#   Flora, the AI concierge (all optional; without them the chat and phone line stay off):
+#   scripts/staging.sh flora-credentials <env-file>  copy the OpenAI and Twilio keys from an env file, unprinted
+#   scripts/staging.sh flora-line [release]          point the Twilio number at this deployment, or restore it
+#   scripts/staging.sh flora-status                  what Flora can and cannot do right now (no secrets)
+#
 # Secrets live in deploy/staging/.env.staging and sign-in details in deploy/staging/access.txt.
 # Both are created on first run, readable only by you, and never committed.
 set -euo pipefail
@@ -28,10 +33,11 @@ LOCAL_URL=https://localhost:8443
 dc() { docker compose -p blooms-staging -f "$DIR/compose.yml" --env-file "$ENV_FILE" --profile public "$@"; }
 secret() { openssl rand -base64 48 | tr -dc 'A-Za-z0-9' | cut -c1-"$1"; }
 get_env() { grep -E "^$1=" "$ENV_FILE" | head -1 | cut -d= -f2-; }
+# The value travels through the environment, never the command line, so secrets stay out of ps.
 set_env() {
   local tmp
   tmp=$(mktemp)
-  awk -v k="$1" -v v="$2" 'BEGIN { done = 0 } index($0, k "=") == 1 { print k "=" v; done = 1; next } { print } END { if (!done) print k "=" v }' "$ENV_FILE" > "$tmp"
+  K="$1" V="$2" awk 'BEGIN { k = ENVIRON["K"]; v = ENVIRON["V"]; done = 0 } index($0, k "=") == 1 { print k "=" v; done = 1; next } { print } END { if (!done) print k "=" v }' "$ENV_FILE" > "$tmp"
   chmod 600 "$tmp"
   mv "$tmp" "$ENV_FILE"
 }
@@ -65,6 +71,20 @@ EOF
   mkdir -p "$DIR/backups"
 }
 
+# The staff gate in front of /admin, /api/admin and /mailbox reuses the mailbox sign-in, so one
+# password opens both. Only a bcrypt hash is written, and the password never appears on a command line.
+ensure_gate() {
+  [ -f "$DIR/gate.caddy" ] && return
+  local auth user pass hash
+  auth=$(get_env MAILBOX_AUTH)
+  user=${auth%%:*}
+  pass=${auth#*:}
+  hash=$(printf '%s\n' "$pass" | docker run --rm -i caddy:2-alpine caddy hash-password | tail -1)
+  case "$hash" in '$2'*) ;; *) echo "Could not hash the staff gate password." >&2; exit 1 ;; esac
+  umask 077
+  printf 'basic_auth @staff bcrypt "Blooms staging, team only" {\n\t%s %s\n}\n' "$user" "$hash" > "$DIR/gate.caddy"
+}
+
 tunnel_url() { dc logs tunnel 2>/dev/null | grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' | tail -1 || true; }
 
 wait_for_tunnel() {
@@ -91,9 +111,10 @@ wait_for_ready() {
 }
 
 write_access() {
-  local url=$1 demo mailbox
+  local url=$1 demo mailbox line=""
   demo=$(get_env DEMO_PASSWORD)
   mailbox=$(get_env MAILBOX_AUTH)
+  [ -f "$DIR/flora-line.previous" ] && line="$(get_env TWILIO_VOICE_NUMBER) (Twilio trial: only verified numbers can call it)"
   umask 077
   cat > "$ACCESS" <<EOF
 Blooms staging demonstration: private access details.
@@ -106,6 +127,9 @@ Customer view
   Wedding planner: $url/plan
   Order lookup:    $url/track
 
+Team gate (your browser asks for this first, before the dashboard or the mailbox)
+  User and password: ${mailbox%%:*} / ${mailbox#*:}
+
 Owner view (team dashboard)
   Sign in at:      $url/admin
   Email:           owner@demo.example
@@ -113,14 +137,66 @@ Owner view (team dashboard)
   Other roles, same password: coordinator@, florist@, sales@, driver@, finance@demo.example
 
 Captured email (Mailpit, never delivered to real inboxes)
-  Mailbox:         $url/mailbox/
-  User and password: ${mailbox%%:*} / ${mailbox#*:}
+  Mailbox:         $url/mailbox/   (same sign-in as the team gate)
+
+Flora, the AI concierge (demonstration mode, fictional data)
+  Chat:            the "Ask Flora" button on any page
+  Phone:           ${line:-not attached. Run scripts/staging.sh flora-line after publishing}
+  Continue a call: $url/continue
+  Dashboard:       $url/admin/flora
 
 Payments are simulated. On the payment page, choose "Pay (simulate success)".
 If the tunnel restarts, its address changes: run scripts/staging.sh resync.
 EOF
   chmod 600 "$ACCESS"
 }
+
+LINE_STATE=$DIR/flora-line.previous
+
+# Twilio REST calls. The account credentials go to curl on stdin, never on its command line.
+twilio_api() {
+  local method=$1 path=$2; shift 2
+  printf 'user = "%s:%s"\n' "$(get_env TWILIO_ACCOUNT_SID)" "$(get_env TWILIO_AUTH_TOKEN)" |
+    curl -sS --fail-with-body --config - -X "$method" "https://api.twilio.com/2010-04-01/Accounts/$(get_env TWILIO_ACCOUNT_SID)$path" "$@"
+}
+
+json_field() { node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const j=JSON.parse(s);const v=process.argv[1].split(".").reduce((o,k)=>o==null?o:o[k],j);console.log(v??"")})' "$1"; }
+
+number_sid() {
+  local number
+  number=$(get_env TWILIO_VOICE_NUMBER)
+  twilio_api GET "/IncomingPhoneNumbers.json?PhoneNumber=$(printf %s "$number" | sed 's/+/%2B/')" | json_field 'incoming_phone_numbers.0.sid'
+}
+
+# Points the number's incoming calls at this deployment. The previous setting is kept, to restore later.
+attach_line() {
+  local url sid
+  url=$(get_env PUBLIC_BASE_URL)
+  case "$url" in https://localhost*) echo "Twilio cannot reach $url. Publish first: scripts/staging.sh publish" >&2; exit 1 ;; esac
+  [ -n "$(get_env TWILIO_VOICE_NUMBER)" ] || { echo "TWILIO_VOICE_NUMBER is not set. Run flora-credentials first." >&2; exit 1; }
+  sid=$(number_sid)
+  [ -n "$sid" ] || { echo "That number was not found on the Twilio account." >&2; exit 1; }
+  if [ ! -f "$LINE_STATE" ]; then
+    umask 077
+    twilio_api GET "/IncomingPhoneNumbers/$sid.json" | json_field voice_url > "$LINE_STATE"
+  fi
+  twilio_api POST "/IncomingPhoneNumbers/$sid.json" \
+    --data-urlencode "VoiceUrl=$url/api/webhooks/voice/incoming" --data-urlencode "VoiceMethod=POST" \
+    --data-urlencode "StatusCallback=$url/api/webhooks/voice/status" --data-urlencode "StatusCallbackMethod=POST" >/dev/null
+  echo "Calls to $(get_env TWILIO_VOICE_NUMBER) now go to Flora at $url"
+}
+
+release_line() {
+  [ -f "$LINE_STATE" ] || { echo "The phone line is not attached to this deployment."; return 0; }
+  local sid previous
+  sid=$(number_sid)
+  previous=$(cat "$LINE_STATE")
+  twilio_api POST "/IncomingPhoneNumbers/$sid.json" --data-urlencode "VoiceUrl=${previous:-https://demo.twilio.com/welcome/voice/}" --data-urlencode "StatusCallback=" >/dev/null
+  rm -f "$LINE_STATE"
+  echo "Restored the number's previous call handling."
+}
+
+line_attached() { [ -f "$LINE_STATE" ]; }
 
 seed_if_empty() {
   local count
@@ -134,8 +210,10 @@ seed_if_empty() {
 case "${1:-}" in
   up)
     ensure_env
+    ensure_gate
     dc build web
-    dc up -d db mailpit proxy backup
+    dc up -d db mailpit backup
+    dc up -d --force-recreate proxy
     dc up -d --force-recreate web worker
     url=$(get_env PUBLIC_BASE_URL)
     wait_for_ready "$url"
@@ -148,16 +226,20 @@ case "${1:-}" in
     ;;
   publish)
     ensure_env
+    ensure_gate
     echo "This makes the staging stack on this machine reachable from the internet through Cloudflare."
+    dc up -d --force-recreate proxy
     dc up -d tunnel
     url=$(wait_for_tunnel)
     set_env PUBLIC_BASE_URL "$url"
     dc up -d --force-recreate web worker
     wait_for_ready "$url"
     write_access "$url"
+    if line_attached; then attach_line; fi
     echo "Published at $url. Stop with: scripts/staging.sh unpublish"
     ;;
   unpublish)
+    if line_attached; then release_line; fi
     dc stop tunnel
     set_env PUBLIC_BASE_URL "$LOCAL_URL"
     dc up -d --force-recreate web worker
@@ -176,6 +258,7 @@ case "${1:-}" in
     fi
     wait_for_ready "$url"
     write_access "$url"
+    if line_attached; then attach_line; fi
     echo "Staging is at $url"
     ;;
   status)
@@ -224,8 +307,41 @@ case "${1:-}" in
     url=$(get_env PUBLIC_BASE_URL)
     wait_for_ready "$url"
     secrets=$(printf '%s\n%s\n%s\n%s' "$(get_env DEMO_PASSWORD)" "$(get_env MAILBOX_AUTH | cut -d: -f2-)" "$(get_env SESSION_SECRET)" "$(get_env POSTGRES_PASSWORD)")
+    for key in OPENAI_API_KEY TWILIO_AUTH_TOKEN; do
+      value=$(get_env "$key")
+      [ -n "$value" ] && secrets=$(printf '%s\n%s' "$secrets" "$value")
+    done
     STAGING_URL="$url" STAGING_OWNER_PASSWORD="$(get_env DEMO_PASSWORD)" STAGING_MAILBOX_AUTH="$(get_env MAILBOX_AUTH)" STAGING_SECRET_VALUES="$secrets" \
       npx playwright test -c playwright.staging.config.ts "${@:2}"
+    ;;
+  flora-credentials)
+    # Copies only the named keys from another env file. Values are never printed.
+    src=${2:-}
+    [ -f "$src" ] || { echo "Usage: scripts/staging.sh flora-credentials <env-file>" >&2; exit 1; }
+    ensure_env
+    read_src() { grep -E "^$1=" "$src" | head -1 | cut -d= -f2- | sed -e 's/^["'\'']//' -e 's/["'\'']$//'; }
+    for key in OPENAI_API_KEY TWILIO_ACCOUNT_SID TWILIO_AUTH_TOKEN; do
+      value=$(read_src "$key")
+      if [ -n "$value" ]; then set_env "$key" "$value"; echo "  set $key"; else echo "  missing $key in $src"; fi
+    done
+    number=$(read_src TWILIO_VOICE_NUMBER); [ -n "$number" ] || number=$(read_src TWILIO_FROM_NUMBER)
+    if [ -n "$number" ]; then set_env TWILIO_VOICE_NUMBER "$number"; echo "  set TWILIO_VOICE_NUMBER"; else echo "  missing TWILIO_VOICE_NUMBER (or TWILIO_FROM_NUMBER) in $src"; fi
+    set_env AI_PROVIDER openai
+    set_env VOICE_ENABLED true
+    echo "Restarting web and worker to pick them up..."
+    dc up -d --force-recreate web worker
+    wait_for_ready "$(get_env PUBLIC_BASE_URL)"
+    "$0" flora-status
+    ;;
+  flora-line)
+    if [ "${2:-}" = "release" ]; then release_line; else attach_line; fi
+    ;;
+  flora-status)
+    for key in AI_PROVIDER OPENAI_API_KEY VOICE_ENABLED TWILIO_ACCOUNT_SID TWILIO_AUTH_TOKEN TWILIO_VOICE_NUMBER TWILIO_MESSAGING_SERVICE_SID; do
+      if [ -n "$(get_env "$key")" ]; then echo "  $key: set"; else echo "  $key: not set"; fi
+    done
+    if line_attached; then echo "  Phone line: attached to $(get_env PUBLIC_BASE_URL)"; else echo "  Phone line: not attached"; fi
+    echo "  The dashboard's Flora page shows the budget, models, and whether chat and phone are answering."
     ;;
   logs)
     dc logs -f --tail=100 "${@:2}"

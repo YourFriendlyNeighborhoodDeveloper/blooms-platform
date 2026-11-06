@@ -7,6 +7,8 @@ import { createPaymentGateway, type PaymentGateway } from './integrations/paymen
 import { createEmailProvider, type EmailProvider } from './integrations/email/provider.js';
 import { createSmsProvider, type SmsProvider } from './integrations/sms/provider.js';
 import { createStorage, type StorageProvider } from './integrations/storage/provider.js';
+import { createAiProvider, type AiProvider } from './integrations/ai/provider.js';
+import { createVoiceProvider, type VoiceProvider } from './integrations/voice/provider.js';
 
 export type AppContext = {
   env: Env;
@@ -18,6 +20,8 @@ export type AppContext = {
   email: EmailProvider;
   sms: SmsProvider;
   storage: StorageProvider;
+  ai: AiProvider;
+  voice: VoiceProvider;
 };
 
 export function createContext(env: Env, overrides: Partial<AppContext> = {}): AppContext {
@@ -35,6 +39,8 @@ export function createContext(env: Env, overrides: Partial<AppContext> = {}): Ap
   ctx.email = overrides.email ?? createEmailProvider(env, log);
   ctx.sms = overrides.sms ?? createSmsProvider(env, log);
   ctx.storage = overrides.storage ?? createStorage(env);
+  ctx.ai = overrides.ai ?? createAiProvider(env, log);
+  ctx.voice = overrides.voice ?? createVoiceProvider(env, log);
   return ctx;
 }
 

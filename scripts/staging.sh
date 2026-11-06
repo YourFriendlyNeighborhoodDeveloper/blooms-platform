@@ -319,7 +319,7 @@ case "${1:-}" in
     src=${2:-}
     [ -f "$src" ] || { echo "Usage: scripts/staging.sh flora-credentials <env-file>" >&2; exit 1; }
     ensure_env
-    read_src() { grep -E "^$1=" "$src" | head -1 | cut -d= -f2- | sed -e 's/^["'\'']//' -e 's/["'\'']$//'; }
+    read_src() { { grep -E "^$1=" "$src" || true; } | head -1 | cut -d= -f2- | sed -e 's/^["'\'']//' -e 's/["'\'']$//'; }
     for key in OPENAI_API_KEY TWILIO_ACCOUNT_SID TWILIO_AUTH_TOKEN; do
       value=$(read_src "$key")
       if [ -n "$value" ]; then set_env "$key" "$value"; echo "  set $key"; else echo "  missing $key in $src"; fi

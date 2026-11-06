@@ -13,6 +13,7 @@ type Props = {
   external?: boolean;
   onClick?: MouseEventHandler<HTMLElement>;
   type?: 'button' | 'submit';
+  disabled?: boolean;
   variant?: Variant;
   size?: 'md' | 'lg';
   icon?: ReactNode;
@@ -41,6 +42,7 @@ export function Button({
   external,
   onClick,
   type = 'button',
+  disabled = false,
   variant = 'solid',
   size = 'md',
   icon,
@@ -131,7 +133,7 @@ export function Button({
     );
   }
   return (
-    <button type={type} {...common}>
+    <button type={type} disabled={disabled} {...common} className={cn(common.className, 'disabled:cursor-wait disabled:opacity-70')}>
       {body}
     </button>
   );

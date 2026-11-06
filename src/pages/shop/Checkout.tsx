@@ -190,6 +190,8 @@ export default function Checkout() {
   const [choices, setChoices] = useState<Record<string, GroupChoice>>({});
   const [consents, setConsents] = useState({ sms_transactional: false, sms_marketing: false, email_marketing: false });
   const [quote, setQuote] = useState<Quote | null>(null);
+  // True while the price and times for the current choices are being checked. Sending waits for it.
+  const [quoting, setQuoting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [alternatives, setAlternatives] = useState<Quote['fulfillments'][number]['alternatives']>([]);
@@ -235,9 +237,11 @@ export default function Checkout() {
   useEffect(() => {
     if (!complete || !cart.lines.length) {
       setQuote(null);
+      setQuoting(false);
       return;
     }
     const controller = new AbortController();
+    setQuoting(true);
     api<Quote>('/api/public/checkout/quote', { body: { fulfillments: payload }, signal: controller.signal })
       .then((q) => {
         setQuote(q);
@@ -245,6 +249,9 @@ export default function Checkout() {
       })
       .catch((err) => {
         if ((err as Error).name !== 'AbortError') setError(err instanceof ApiError ? err.message : 'We could not check that. Please try again.');
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setQuoting(false);
       });
     return () => controller.abort();
     // The quote depends on the serialized payload.
@@ -272,6 +279,7 @@ export default function Checkout() {
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
+    if (quoting || busy) return;
     setError(null);
     setFieldErrors({});
     setAlternatives([]);
@@ -431,8 +439,8 @@ export default function Checkout() {
 
             {quote?.refund_policy && <p className="whitespace-pre-line text-[0.82rem] leading-relaxed text-charcoal/70">{quote.refund_policy}</p>}
 
-            <Button type="submit" size="lg" icon={<Arrow />} className="w-full [&>span]:w-full [&>span>span]:w-full">
-              {busy ? 'One moment…' : reviewFirst ? 'Send my request' : 'Continue to secure payment'}
+            <Button type="submit" size="lg" icon={<Arrow />} disabled={busy || quoting} className="w-full [&>span]:w-full [&>span>span]:w-full">
+              {busy ? 'One moment…' : quoting ? 'Checking your times…' : reviewFirst ? 'Send my request' : 'Continue to secure payment'}
             </Button>
             <p className="text-center text-[0.8rem] text-charcoal/70">{reviewFirst ? 'No payment is taken now.' : 'Payment is handled on a secure page. Your card details never reach this site.'}</p>
           </div>

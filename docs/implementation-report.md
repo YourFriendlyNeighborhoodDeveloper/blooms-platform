@@ -114,6 +114,8 @@ Run on 2026-11-05, on the developer's machine.
 | Production dependency audit | 0 vulnerabilities |
 | Real Stripe test-mode payment | **Not run.** No business Stripe account is connected. |
 | Flora (added later the same day) | Server tests **25 of 25** in `concierge.test.ts`, within a full run of **185 passed, 6 skipped**. Browser test `e2e/flora.spec.ts` passed. Live: OpenAI reached with a valid key but refused for credits; Twilio webhook, token and media path exercised with a synthetic caller. See [flora.md](flora.md#verified-and-not-yet). |
+| Staging, through its public address | `scripts/staging.sh verify` in Chromium through the Cloudflare tunnel: **12 of 12 passed** on 2026-11-06. Covered: the phone-sized order journey, payments, weddings, protective rules, roles, the team gate, and that no secret (now including the OpenAI key and Twilio token) reaches the browser. Forged and unsigned voice webhooks got 403. The media WebSocket upgraded through Caddy and refused a bad token. |
+| Checkout defect found through the public address | Fixed. Over the tunnel's slower connection, a click on **Continue to secure payment** made while the chosen time was still being priced was ignored, and the customer saw "Please choose a different time." The button now waits ("Checking your times…") until the current price is back. |
 | Planner defect found by Flora's browser test | Fixed. Clicking **Continue** on the date step sent the plan one step early, skipping the final step with its opt-in boxes, because the browser reused the button as it changed to **Send my plan**. The two buttons are now separate elements, and the form sends only from the last step. The accessibility test had been passing on the resulting thank-you page, and now checks the real last step. That uncovered a keyboard gap on the empty Pipeline board, now fixed. |
 
 How to reproduce each of these is in [testing.md](testing.md) and [operations.md](operations.md).
@@ -121,7 +123,7 @@ How to reproduce each of these is in [testing.md](testing.md) and [operations.md
 ## 6. Actual deployment status
 
 - **Code:** committed on the `platform` branch and pushed to a private GitHub repository, with git bundle backups on the developer's machine. Flora's work is committed separately.
-- **Staging demonstration:** runs in Docker on the developer's machine at `https://localhost:8443` (`scripts/staging.sh`), with fictional data, simulated payments and captured email. A team gate protects `/admin` and `/mailbox`. Publishing it to a public address is a separate step that the developer runs.
+- **Staging demonstration:** runs in Docker on the developer's machine (`scripts/staging.sh`), with fictional data, simulated payments and captured email. A team gate protects `/admin` and `/mailbox`. `scripts/staging.sh publish` serves it at a temporary `trycloudflare.com` address that changes on each publish, and `unpublish` takes it off the internet. Flora is configured on it in demonstration mode. Her phone line is not attached.
 - **Public preview:** `abraxas-blooms-concept.pages.dev` still serves the static concept from 2026-10-31, unchanged.
 - **Production:** not deployed.
 

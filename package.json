@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "description": "Commerce, wedding planning and operations platform for Blooms Boutique & Floral (Saginaw, MI). An independent concept by Abraxas Technologies until the owner approves launch.",
+  "author": "Ryan Keeling",
   "type": "module",
   "scripts": {
     "dev": "concurrently -n web,api,worker -c magenta,blue,yellow \"vite\" \"tsx watch server/index.ts\" \"tsx watch server/worker.ts\"",

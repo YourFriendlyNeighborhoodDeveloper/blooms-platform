@@ -1,12 +1,75 @@
-# Blooms Boutique & Floral: website and business platform
+# Blooms Boutique & Floral: commerce, wedding planning and operations platform
 
-A website, online shop, wedding planner, and team dashboard for **Blooms Boutique & Floral**
-(7680 Gratiot Road, Suite 4, Saginaw, MI), by **Abraxas Technologies**.
+Designed and built by **Ryan Keeling**, Abraxas Technologies.
 
-> **This is not the official Blooms website.** It began as an independent concept and has not been
-> launched. Every page says so, preview builds ask search engines not to list them, and payments run
-> in test mode. Photography is illustrative stock from Unsplash and does not show Blooms' own work.
-> Going live is a deliberate step that needs the owner's approval. See [docs/operations.md](docs/operations.md#going-live).
+A full-stack platform for a florist and event-decor business in Saginaw, Michigan: an online shop
+with real delivery and capacity rules, a wedding and event planner, a team dashboard that runs the
+business day to day, and **Flora**, an AI concierge for website chat and phone calls.
+
+![The home page on desktop](docs/images/home.jpg)
+
+> **An independent concept, not the official Blooms website.** I built this on my own initiative.
+> Blooms Boutique & Floral has not commissioned, endorsed or launched it, and it is not affiliated
+> with the business. Every page says so, preview builds ask search engines not to list them,
+> payments run in test mode, all products, customers and orders are fictional, and the photography
+> is stock from Unsplash.
+
+## At a glance
+
+| | |
+| --- | --- |
+| **What** | Storefront and checkout, a seven-step wedding planner, a 31-screen staff dashboard, and an AI concierge on chat and voice |
+| **Stack** | React 19, TypeScript, Tailwind CSS 4, Node with Hono, PostgreSQL 17 with Kysely, Stripe, OpenAI, Twilio, Docker |
+| **Size** | About 40,000 lines of TypeScript, 6 SQL migrations, over 20 scheduled background jobs |
+| **Tests** | 187 server tests against a real PostgreSQL database, 73 browser tests (desktop Chrome, Android-size Chrome, iPhone-size WebKit) with automated axe accessibility checks, and an end-to-end suite that runs against the published staging site |
+| **Status** | Working staging demonstration in Docker, published through a Cloudflare tunnel for presentations. Not in production |
+
+## Engineering highlights
+
+- **Correctness enforced by the database, not just the code.** Overselling is blocked with atomic
+  conditional updates and `CHECK` constraints. Double-booking a consultation or crew is blocked with
+  PostgreSQL `EXCLUDE USING gist` on time ranges. Rentals are guarded by a row-locking trigger that
+  includes cleaning buffers, and daily capacity is claimed under per-date advisory locks.
+- **One capacity engine for everyone.** Checkout, staff drag-and-drop in the calendar, and Flora
+  all ask the same engine. It weighs opening hours, preparation time, workload points, driver
+  schedules, delivery windows, closures and lead times, refuses impossible requests before payment,
+  and offers the earliest real alternative.
+- **Reliable side effects.** Every event is stored before anything is sent. A database-backed queue
+  retries with backoff and recovers after restarts, and webhooks are stored once per event and
+  processed with monotonic state transitions. A six-hourly job checks that stock, payments, refunds,
+  invoices and bookings all agree.
+- **Payments done safely.** Customers pay on Stripe's hosted page, so card data never reaches the
+  server. An order is marked paid only by a signed webhook. Pending, failed, expired, duplicate and
+  late payments are all handled.
+- **An AI concierge with guardrails.** Flora uses the OpenAI Responses API with tool calls into the
+  same business logic, so dates and prices come from the real system, not the model. Phone calls
+  bridge Twilio Media Streams (G.711 μ-law) to the OpenAI Realtime API. She has a demonstration
+  sandbox, a monthly spending cap, full transcripts, and staff handoff with tickets that escalate.
+  When the AI account fails, she raises an alert, tells visitors plainly that she's offline,
+  and comes back on her own once the account works.
+- **Security.** Permissions are checked on the server for every staff endpoint, with roles the
+  owner can edit. Forms are protected by an origin check against cross-site requests, and sign-in by
+  rate limits with account lockout. Uploads are type-checked, re-encoded and stored privately. The
+  server refuses to start with unsafe settings, such as simulated payments in production.
+- **Accessible and mobile-first.** Semantic landmarks, keyboard-operable menus and forms, axe checks
+  in the browser tests, and `prefers-reduced-motion` support. On phones, the chat opens as a
+  full-screen sheet that respects the iPhone's safe areas and stays above the on-screen keyboard.
+- **Operations.** A production Docker image and Compose file with HTTPS, nightly backups and a restore
+  check, plus a staging script that publishes the demo, verifies it from outside, and resets it.
+
+## Screenshots
+
+| Shop | Wedding and event planner |
+| --- | --- |
+| ![The shop](docs/images/shop.jpg) | ![The wedding and event planner](docs/images/plan.jpg) |
+
+| Team dashboard | Calendar |
+| --- | --- |
+| ![The dashboard overview](docs/images/admin-overview.jpg) | ![The team calendar](docs/images/admin-calendar.jpg) |
+
+| Inventory | Flora on a phone, while the AI account is paused |
+| --- | --- |
+| ![Inventory](docs/images/admin-inventory.jpg) | <img src="docs/images/phone-flora.jpg" alt="Flora's chat on an iPhone, showing that she is offline and offering other ways to get help" width="300"> |
 
 ## What it does
 
@@ -26,7 +89,7 @@ plan the customer reviews and sends on the website, and passes anything she cann
 She has a demonstration sandbox, a monthly spending limit, and a full transcript in the dashboard. See
 [docs/flora.md](docs/flora.md).
 
-**Behind the scenes.****Behind the scenes.** A capacity engine that weighs staff hours, workload, crews, rentals, delivery
+**Behind the scenes.** A capacity engine that weighs staff hours, workload, crews, rentals, delivery
 windows and closures. The database enforces no overselling and no double booking. Background jobs
 send messages, remind, reconcile payments and recover after restarts.
 
@@ -37,8 +100,8 @@ and still needed.
 
 React 19, TypeScript, Vite 7, Tailwind CSS 4, Motion 12 and React Router 7 for the site and dashboard.
 Node with Hono, PostgreSQL 17 with Kysely, and Zod on the server. Stripe, Resend or SMTP, Twilio
-(optional), the OpenAI API for Flora (optional), and any S3-compatible storage as integrations. Vitest and Playwright for tests. Fonts are
-self-hosted (Fraunces and Instrument Sans, both SIL OFL).
+(optional), the OpenAI API for Flora (optional), and any S3-compatible storage as integrations. Vitest
+and Playwright for tests. Fonts are self-hosted (Fraunces and Instrument Sans, both SIL OFL).
 
 ## Getting started
 
@@ -75,7 +138,7 @@ Payments are simulated locally (`PAYMENTS_MODE=mock`), and email is recorded rat
 
 | | |
 | --- | --- |
-| [Client handoff](docs/client-handoff/README.md) | Plain-language guides for the owner, and the demonstration script |
+| [Owner handoff](docs/client-handoff/README.md) | Plain-language guides for the owner, should the business adopt it, and the demonstration script |
 | [Implementation report](docs/implementation-report.md) | What is finished, tested, mocked, and still needed |
 | [Owner checklist](docs/owner-checklist.md) | Decisions and accounts only the business can provide |
 | [Administrator guide](docs/admin-guide.md) and [staff guide](docs/staff-guide.md) | Using the dashboard |
@@ -89,10 +152,11 @@ Payments are simulated locally (`PAYMENTS_MODE=mock`), and email is recorded rat
 
 ## Facts: confirmed versus to confirm with the owner
 
-Used as confirmed: the business name, co-owner Samantha Todd, the address, phone, public email
-(`bloomsbotiquefloral@gmail.com`, spelled as listed), and the Facebook, WeddingWire and The Knot
-profile links. Shop hours come from the township listing, and are shown as unverified until the owner
-saves real hours in the dashboard. Open questions are in [docs/owner-checklist.md](docs/owner-checklist.md).
+The business details come from its public listings: the business name, co-owner Samantha Todd, the
+address, phone, public email (`bloomsbotiquefloral@gmail.com`, spelled as listed), and the Facebook,
+WeddingWire and The Knot profile links. Shop hours come from the township listing, and are shown as
+unverified until the owner saves real hours in the dashboard. Open questions are in
+[docs/owner-checklist.md](docs/owner-checklist.md).
 
 ## Replacing the imagery
 
@@ -111,5 +175,7 @@ off the intro, smooth scrolling, petals and shader animation.
 
 ## Credits
 
-Design and development: Abraxas Technologies. Illustrative photography: [Unsplash](https://unsplash.com)
-contributors, under the Unsplash License.
+Design and development: Ryan Keeling, Abraxas Technologies. Illustrative photography:
+[Unsplash](https://unsplash.com) contributors, under the Unsplash License.
+
+© 2026 Ryan Keeling. All rights reserved. The code is shared for review and is not licensed for reuse.

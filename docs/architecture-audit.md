@@ -37,8 +37,9 @@ what it is not, and that care has to carry into the platform.
 ## Standing constraint: the site is an uncommissioned concept
 
 The repository and footer state that this "has not been commissioned" and "is not the official
-Blooms website". The build directive names Samantha and the Blooms team as the client. These
-two statements disagree, and the code cannot settle it. Until the owner's approval is confirmed:
+Blooms website". That remains true: later build instructions were written as though for the Blooms
+team, but no agreement with the business exists, and the code cannot change that. Until the owner's
+approval is confirmed:
 
 - `ConceptBadge`, the footer disclosure and the `noindex` default stay in place.
 - `SITE_MODE=production` remains the single, deliberate switch that removes them.
